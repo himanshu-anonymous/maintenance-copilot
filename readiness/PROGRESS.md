@@ -173,4 +173,16 @@ Executed 20 expert test cases including deliberate traps and safety emergencies:
 ---
 
 ## Phase 6: Polish, Warmup & Demo Walkthrough
-*In progress...*
+
+### Polish & Tooling Delivered
+- **Warmup Scripts**: `scripts/warmup.py` and `scripts/warmup.sh` to prime the BM25 retrieval index, load graph caches, and pre-warm persistent HTTP/2 connections on boot.
+- **Seeding Tools**: `scripts/seed.sh` for declarative database initialization.
+- **Demo Script**: Comprehensive 60-second evaluator walkthrough in `DEMO.md` detailing the 3-step proof-of-concept (symptom -> provenance -> supervisor verification loop) and all 3 deliberate traps.
+- **Full Architecture Documentation**: `README.md` complete with Mermaid diagrams, stack specifications, security boundaries, and honestly measured latency percentiles.
+
+### Phase 6 ACCEPT Checks
+- [x] Warmup script verifies health and pre-warms retrieval pipeline
+- [x] `DEMO.md` provides 60-second reviewer walkthrough
+- [x] README.md contains architectural diagrams, stack specs, and measured latency numbers
+- [x] All 6 phases completed end-to-end with green checks across all acceptance criteria
+- [x] Git repository ready for push to remote: `https://github.com/himanshu-anonymous/maintenance-copilot.git`
