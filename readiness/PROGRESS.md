@@ -120,4 +120,32 @@ Executed 20 expert test cases including deliberate traps and safety emergencies:
 ---
 
 ## Phase 4: Workflow and Memory (SQLite)
+
+### Schema & Workflow Architecture
+- **Operational Database**: SQLite with `aiosqlite` and SQLAlchemy AsyncSession.
+  - Tables: `users` (technician, supervisor), `assets` (P-101 through M-105), `sessions` (troubleshooting runs), `findings` (field measurements and observations), `work_orders` (drafting through resolution), `outcomes` (supervisor-approved resolutions), `audit_log` (immutable audit trail of every state transition).
+- **Authentication & Security**:
+  - JWT auth (HS256) with role-based access control (`technician`, `supervisor`).
+  - Passwords hashed using standard `bcrypt` salt generation.
+  - Demo accounts automatically seeded: `tech` (`tech123`, role: `technician`), `supervisor` (`super123`, role: `supervisor`).
+- **Closed-Loop Verification Gate**:
+  - The AI and technician NEVER mark an asset repaired or ready.
+  - Technician records findings, drafts work order, and submits proposed resolution (`pending_approval`).
+  - Only a verified supervisor approval transitions a work order to `approved`, creates a `Verified Outcome` record, and adds a verified edge to the in-memory graph (`origin = technician_reported`, `verification_status = verified`, `approved_by` set).
+  - Graph indexes immediately refresh so subsequent diagnoses reflect the new verified precedent.
+  - Supervisor rejection flags the work order with feedback and leaves graph unchanged (zero false precedents).
+- **Analytics & Fleet Health**:
+  - `recurring.py`: Identifies fault clusters by asset, component, and cause over time, approximating MTBF (Mean Time Between Failures).
+  - `readiness.py`: Computes 0-100 equipment readiness scores factoring open work order severity, unresolved findings, inspection recency, and manual revision freshness (identifying compliance traps such as P-102 operating on superseded Rev A).
+
+### Phase 4 ACCEPT Checks
+- [x] End-to-end maintenance loop tested in automated suite (`test_complete_maintenance_workflow_accept`)
+- [x] Technician submits resolution -> supervisor approves -> graph has a new verified outcome edge -> reflected in graph store
+- [x] Technician forbidden from self-approving work orders (HTTP 403)
+- [x] Supervisor rejection records feedback and prevents graph edge addition (`test_supervisor_rejection_adds_no_graph_edge`)
+- [x] 14/14 automated tests pass across knowledge, graph, health, and workflow
+
+---
+
+## Phase 5: Dashboard (React + Vite + Tailwind + Creative Tim + React Flow)
 *In progress...*

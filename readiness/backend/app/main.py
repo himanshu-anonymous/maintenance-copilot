@@ -12,6 +12,13 @@ from app.diagnosis.engine import diagnosis_engine
 from app.api.health import router as health_router
 from app.api.diagnose import router as diagnose_router
 from app.api.metrics import router as metrics_router
+from app.api.auth import router as auth_router
+from app.api.assets import router as assets_router
+from app.api.sessions import router as sessions_router
+from app.api.workorders import router as workorders_router
+from app.api.analytics import router as analytics_router
+from app.api.graph import router as graph_router
+from app.security import init_db
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,12 +31,7 @@ logger = logging.getLogger("readiness")
 async def lifespan(app: FastAPI):
     logger.info("Initializing Readiness Assistant backend...")
     
-    # 1. Initialize SQLite tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("Database initialized.")
-
-    # 2. Load Graph snapshot into memory
+    # 1. Load Graph snapshot into memory
     possible_paths = [
         Path("/app/graph.json"),
         Path(__file__).resolve().parent.parent.parent / "graph.json",
@@ -45,6 +47,10 @@ async def lifespan(app: FastAPI):
             break
     if not loaded:
         logger.warning("graph.json snapshot not found on startup; building in-memory...")
+
+    # 2. Initialize SQLite tables and seed demo data
+    await init_db()
+    logger.info("Database initialized and demo data seeded.")
 
     # 3. Check LLM client
     try:
@@ -81,7 +87,13 @@ app.add_middleware(
 
 # Include Routers
 app.include_router(health_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
+app.include_router(assets_router, prefix="/api")
 app.include_router(diagnose_router, prefix="/api")
+app.include_router(sessions_router, prefix="/api")
+app.include_router(workorders_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
+app.include_router(graph_router, prefix="/api")
 app.include_router(metrics_router, prefix="/api")
 
 

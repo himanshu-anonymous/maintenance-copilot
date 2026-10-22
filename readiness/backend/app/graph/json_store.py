@@ -173,6 +173,17 @@ class JsonGraphStore(GraphStore):
 
         return results
 
+    def get_components_for_equipment(self, equipment_id: str) -> List[Dict[str, Any]]:
+        """Returns all Component nodes linked via HAS_COMPONENT edges."""
+        components = []
+        outgoing = self._outgoing_edges.get(equipment_id, [])
+        for edge in outgoing:
+            if edge.get("edge_type") == "HAS_COMPONENT":
+                node = self._nodes.get(edge["target"])
+                if node:
+                    components.append(node)
+        return components
+
     def get_verified_incidents(
         self,
         cause_id: Optional[str] = None,
