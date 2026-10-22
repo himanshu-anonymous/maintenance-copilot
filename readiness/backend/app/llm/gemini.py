@@ -1,9 +1,12 @@
 import json
 import time
 import asyncio
+import logging
 from typing import AsyncGenerator, Dict, Any, Optional, Tuple
 import httpx
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiClient:
@@ -67,14 +70,10 @@ class GeminiClient:
         target_model = self._format_model_name(model or settings.LLM_MODEL)
         url = f"{self.base_url}/{target_model}:generateContent?key={settings.GEMINI_API_KEY}"
 
-        contents = []
-        if system_instruction:
-            contents.append({"role": "user", "parts": [{"text": f"SYSTEM INSTRUCTIONS:\n{system_instruction}"}]})
-            contents.append({"role": "model", "parts": [{"text": "Understood. I will strictly follow all system constraints."}]})
-        contents.append({"role": "user", "parts": [{"text": prompt}]})
+        combined_text = f"SYSTEM INSTRUCTIONS:\n{system_instruction}\n\nUSER PROMPT:\n{prompt}" if system_instruction else prompt
+        contents = [{"parts": [{"text": combined_text}]}]
 
         gen_config: Dict[str, Any] = {
-            "temperature": temperature,
             "maxOutputTokens": max_tokens,
         }
         if response_json:
@@ -119,7 +118,7 @@ class GeminiClient:
         system_instruction: Optional[str] = None,
         model: Optional[str] = None,
         temperature: float = 0.1,
-        max_tokens: int = 1200,
+        max_tokens: int = 1000,
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """
         Streaming generation using SSE endpoint.
@@ -132,16 +131,12 @@ class GeminiClient:
         target_model = self._format_model_name(model or settings.LLM_MODEL)
         url = f"{self.base_url}/{target_model}:streamGenerateContent?key={settings.GEMINI_API_KEY}&alt=sse"
 
-        contents = []
-        if system_instruction:
-            contents.append({"role": "user", "parts": [{"text": f"SYSTEM INSTRUCTIONS:\n{system_instruction}"}]})
-            contents.append({"role": "model", "parts": [{"text": "Understood. I will strictly follow all system constraints."}]})
-        contents.append({"role": "user", "parts": [{"text": prompt}]})
+        combined_text = f"SYSTEM INSTRUCTIONS:\n{system_instruction}\n\nUSER PROMPT:\n{prompt}" if system_instruction else prompt
+        contents = [{"parts": [{"text": combined_text}]}]
 
         payload = {
             "contents": contents,
             "generationConfig": {
-                "temperature": temperature,
                 "maxOutputTokens": max_tokens,
             }
         }
@@ -177,12 +172,17 @@ class GeminiClient:
                                 continue
                             parts = candidates[0].get("content", {}).get("parts", [])
                             for p in parts:
-                                # Filter out model internal thoughts
+                                now = int((time.perf_counter() - t0) * 1000)
+                                # Filter out model internal thoughts from user-facing stream
                                 if p.get("thought", False):
+                                    yield {
+                                        "type": "thinking",
+                                        "elapsed_ms": now
+                                    }
                                     continue
+
                                 text_piece = p.get("text", "")
                                 if text_piece:
-                                    now = int((time.perf_counter() - t0) * 1000)
                                     if first_token_time is None:
                                         first_token_time = now
                                     yield {
@@ -203,12 +203,48 @@ class GeminiClient:
             }
 
         except Exception as e:
-            # Yield error event so caller can switch to fallback or report
-            yield {
-                "type": "error",
-                "error": str(e),
-                "elapsed_ms": int((time.perf_counter() - t0) * 1000),
-            }
+            logger.warning(f"SSE stream failed on {target_model} ({e}). Falling back to non-streaming generateContent.")
+            try:
+                # Resilient fallback: call generateContent and stream the tokens smoothly
+                res = await self.generate(
+                    prompt=prompt,
+                    system_instruction=system_instruction,
+                    model=target_model,
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                generated_text = res.get("text", "")
+                words = generated_text.split(" ")
+                now = int((time.perf_counter() - t0) * 1000)
+                first_token_time = now
+
+                # Yield words in realistic small streaming bursts
+                chunk_buffer = []
+                for idx, w in enumerate(words):
+                    chunk_buffer.append(w)
+                    if len(chunk_buffer) >= 4 or idx == len(words) - 1:
+                        yield {
+                            "type": "chunk",
+                            "text": " ".join(chunk_buffer) + " ",
+                            "first_token_ms": first_token_time,
+                            "elapsed_ms": int((time.perf_counter() - t0) * 1000)
+                        }
+                        chunk_buffer = []
+                        await asyncio.sleep(0.01)
+
+                total_ms = int((time.perf_counter() - t0) * 1000)
+                yield {
+                    "type": "done",
+                    "first_token_ms": first_token_time,
+                    "total_ms": total_ms,
+                    "model": target_model,
+                }
+            except Exception as non_stream_exc:
+                yield {
+                    "type": "error",
+                    "error": str(non_stream_exc),
+                    "elapsed_ms": int((time.perf_counter() - t0) * 1000),
+                }
 
 
 gemini_client = GeminiClient()

@@ -6,8 +6,8 @@ from typing import Optional
 class Settings(BaseSettings):
     # LLM Settings
     GEMINI_API_KEY: str = Field(default="", description="Google Gemini API Key")
-    LLM_MODEL: str = Field(default="models/gemma-4-26b-a4b-it")
-    LLM_FALLBACK_MODEL: str = Field(default="models/gemma-4-31b-it")
+    LLM_MODEL: str = Field(default="models/gemini-3-flash-preview")
+    LLM_FALLBACK_MODEL: str = Field(default="models/gemini-3.5-flash")
     FIRST_TOKEN_TIMEOUT_MS: int = Field(default=2500)
     THESYS_API_KEY: Optional[str] = Field(default=None)
 

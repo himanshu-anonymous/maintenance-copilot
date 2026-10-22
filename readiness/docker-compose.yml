@@ -34,7 +34,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - LLM_MODEL=${LLM_MODEL:-models/gemma-4-26b-a4b-it}
       - LLM_FALLBACK_MODEL=${LLM_FALLBACK_MODEL:-models/gemma-4-31b-it}
-      - FIRST_TOKEN_TIMEOUT_MS=${FIRST_TOKEN_TIMEOUT_MS:-2500}
+      - FIRST_TOKEN_TIMEOUT_MS=${FIRST_TOKEN_TIMEOUT_MS:-5000}
       - THESYS_API_KEY=${THESYS_API_KEY:-}
       - JWT_SECRET=${JWT_SECRET:-super_secret_jwt_readiness_key_production_grade_38192}
       - DEMO_TECH_PASSWORD=${DEMO_TECH_PASSWORD:-tech123}
@@ -51,8 +51,12 @@ services:
       - PORT=8000
     volumes:
       - sqlite_data:/app/data
+      - ./backend/app:/app/app
+      - ./backend/tests:/app/tests
+      - ./scripts:/app/scripts
       - ./knowledge:/app/knowledge
       - ./graph.yaml:/app/graph.yaml
+      - ./graph.json:/app/graph.json
     depends_on:
       redis:
         condition: service_healthy

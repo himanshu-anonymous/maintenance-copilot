@@ -17,8 +17,14 @@ class HealthResponse(BaseModel):
     version: str = "1.0.0"
 
 
+# Cache last gemini healthcheck for 300 seconds to prevent exhausting API quota
+_last_gemini_check_time = 0.0
+_last_gemini_status = (True, "healthy")
+
+
 @router.get("", response_model=HealthResponse)
-async def get_health():
+async def get_health(live_llm: bool = False):
+    global _last_gemini_check_time, _last_gemini_status
     services: Dict[str, Any] = {}
     all_healthy = True
 
@@ -42,8 +48,16 @@ async def get_health():
         all_healthy = False
         services["redis"] = {"status": "unhealthy", "error": str(e)}
 
-    # 3. Gemini LLM Check
-    is_gemini_ok, gemini_msg = await gemini_client.check_health()
+    # 3. Gemini LLM Check (cached to avoid exhausting rate limits on 10s healthchecks)
+    import time
+    now = time.time()
+    if live_llm or (now - _last_gemini_check_time > 300):
+        is_gemini_ok, gemini_msg = await gemini_client.check_health()
+        _last_gemini_status = (is_gemini_ok, gemini_msg)
+        _last_gemini_check_time = now
+    else:
+        is_gemini_ok, gemini_msg = _last_gemini_status
+
     if is_gemini_ok:
         services["gemini"] = {
             "status": "healthy",
@@ -51,7 +65,6 @@ async def get_health():
             "fallback_model": settings.LLM_FALLBACK_MODEL
         }
     else:
-        # Don't fail the whole health check if rate-limited, but report accurately
         services["gemini"] = {
             "status": "degraded" if "429" in gemini_msg else "unhealthy",
             "message": gemini_msg

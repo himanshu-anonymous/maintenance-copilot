@@ -11,71 +11,74 @@ async def stream_with_fallback(
     prompt: str,
     system_instruction: Optional[str] = None,
     temperature: float = 0.1,
-    max_tokens: int = 1200,
+    max_tokens: int = 600,
 ) -> AsyncGenerator[Dict[str, Any], None]:
     """
     Streams from primary model (LLM_MODEL).
-    If no first token arrives within FIRST_TOKEN_TIMEOUT_MS, or an error occurs,
-    automatically cancels and switches to LLM_FALLBACK_MODEL.
+    If no first token arrives within FIRST_TOKEN_TIMEOUT_MS, or an HTTP error/500 occurs,
+    automatically cancels and switches to LLM_FALLBACK_MODEL, and then to high-speed gemini-3-flash-preview.
     """
     first_token_timeout_sec = settings.FIRST_TOKEN_TIMEOUT_MS / 1000.0
-    primary_model = settings.LLM_MODEL
-    fallback_model = settings.LLM_FALLBACK_MODEL
+    models_to_try = [
+        settings.LLM_MODEL,
+        settings.LLM_FALLBACK_MODEL,
+        "models/gemini-3-flash-preview"
+    ]
+    seen = set()
+    candidate_models = []
+    for m in models_to_try:
+        if m and m not in seen:
+            seen.add(m)
+            candidate_models.append(m)
 
-    first_token_received = False
-    use_fallback = False
+    for idx, target_model in enumerate(candidate_models):
+        first_token_received = False
+        failed = False
 
-    async def _run_stream(target_model: str):
-        async for item in gemini_client.stream_generate(
-            prompt=prompt,
-            system_instruction=system_instruction,
-            model=target_model,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        ):
-            yield item
+        try:
+            stream_iter = gemini_client.stream_generate(
+                prompt=prompt,
+                system_instruction=system_instruction,
+                model=target_model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
 
-    stream_iter = _run_stream(primary_model)
+            while True:
+                try:
+                    timeout = None if first_token_received else first_token_timeout_sec
+                    chunk = await asyncio.wait_for(stream_iter.__anext__(), timeout=timeout)
 
-    try:
-        while True:
-            try:
-                # Wait for next chunk, enforcing first token timeout if not received yet
-                timeout = None if first_token_received else first_token_timeout_sec
-                chunk = await asyncio.wait_for(stream_iter.__anext__(), timeout=timeout)
+                    if chunk.get("type") == "error":
+                        logger.warning(f"Error on model {target_model}: {chunk.get('error')}")
+                        failed = True
+                        break
 
-                if chunk.get("type") == "error":
-                    logger.warning(f"Error on primary model {primary_model}: {chunk.get('error')}. Falling back.")
-                    use_fallback = True
+                    if chunk.get("type") in ("chunk", "thinking"):
+                        first_token_received = True
+
+                    if chunk.get("type") != "thinking":
+                        yield chunk
+
+                    if chunk.get("type") == "done":
+                        return
+
+                except asyncio.TimeoutError:
+                    logger.warning(f"First token timeout ({settings.FIRST_TOKEN_TIMEOUT_MS}ms) on {target_model}.")
+                    failed = True
                     break
-
-                if chunk.get("type") == "chunk":
-                    first_token_received = True
-
-                yield chunk
-
-                if chunk.get("type") == "done":
+                except StopAsyncIteration:
                     return
 
-            except asyncio.TimeoutError:
-                logger.warning(f"First token timeout ({settings.FIRST_TOKEN_TIMEOUT_MS}ms) on {primary_model}. Falling back to {fallback_model}.")
-                use_fallback = True
-                break
-            except StopAsyncIteration:
-                return
+        except Exception as exc:
+            logger.warning(f"Exception during stream on {target_model}: {exc}")
+            failed = True
 
-    except Exception as exc:
-        logger.warning(f"Exception during stream on {primary_model}: {exc}. Falling back.")
-        use_fallback = True
+        if not failed and first_token_received:
+            return
 
-    if use_fallback:
-        logger.info(f"Executing fallback stream with {fallback_model}")
-        try:
-            async for chunk in _run_stream(fallback_model):
-                yield chunk
-        except Exception as fallback_exc:
-            logger.error(f"Fallback model failed as well: {fallback_exc}")
+        if idx == len(candidate_models) - 1:
             yield {
                 "type": "error",
-                "error": f"LLM generation failed: {str(fallback_exc)}"
+                "error": "All LLM models in fallback chain exhausted."
             }
