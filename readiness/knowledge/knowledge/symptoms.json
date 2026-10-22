@@ -1,0 +1,253 @@
+[
+  {
+    "id": "SYMP-VIB-01",
+    "name": "High Radial Vibration",
+    "description": "Radial vibration amplitude exceeding ISO limits on pump or motor bearing housings.",
+    "aliases": [
+      "vibrating violently",
+      "pump shaking",
+      "heavy hum",
+      "shuddering on skid",
+      "excessive rattle",
+      "bearing vibration"
+    ],
+    "alarm_codes": [
+      "ALM-VIB-101",
+      "ALM-VIB-HI",
+      "VIB-TRIP-01"
+    ],
+    "category": "mechanical"
+  },
+  {
+    "id": "SYMP-CAV-01",
+    "name": "Cavitation Noise & Suction Crackling",
+    "description": "Loud popping, crackling, or gravel-in-casing noise accompanied by erratic suction pressure.",
+    "aliases": [
+      "sounds like marbles",
+      "gravel rattling inside casing",
+      "crackling sound",
+      "hollow thumping",
+      "suction rattling",
+      "popping inside pump"
+    ],
+    "alarm_codes": [
+      "ALM-SUCT-P-LO",
+      "ALM-NPSH-01"
+    ],
+    "category": "hydraulic"
+  },
+  {
+    "id": "SYMP-SEAL-01",
+    "name": "Mechanical Seal Fluid Leakage",
+    "description": "Process or barrier fluid dripping or pooling beneath seal gland.",
+    "aliases": [
+      "liquid dripping from seal gland",
+      "puddle under seal plate",
+      "barrier fluid loss",
+      "seal leaking barrier fluid",
+      "wet seal housing",
+      "spray from pump shaft"
+    ],
+    "alarm_codes": [
+      "ALM-SEAL-LVL-LO",
+      "ALM-DRAIN-HI"
+    ],
+    "category": "mechanical"
+  },
+  {
+    "id": "SYMP-TEMP-01",
+    "name": "High Motor Bearing Temperature",
+    "description": "Motor end-shield or bearing cap temperature exceeding 85\u00b0C.",
+    "aliases": [
+      "motor end-shield burning hot",
+      "bearing housing overheating",
+      "smell of hot grease",
+      "hot to touch motor bearing",
+      "motor bearing hot"
+    ],
+    "alarm_codes": [
+      "ALM-MTR-BRG-HI",
+      "ALM-TEMP-M-104",
+      "RTD-BRG-TRIP"
+    ],
+    "category": "thermal"
+  },
+  {
+    "id": "SYMP-DISCH-PULS-01",
+    "name": "Discharge Pressure Pulsation",
+    "description": "Rapid oscillation of discharge pressure needle and rhythmic vibration in discharge piping.",
+    "aliases": [
+      "pulsing needle on pressure gauge",
+      "pipe hammering on discharge",
+      "rhythmic surge",
+      "discharge line surging",
+      "pressure fluctuating rapidly"
+    ],
+    "alarm_codes": [
+      "ALM-PRESS-PULS",
+      "ALM-DISCH-FLUTTER"
+    ],
+    "category": "hydraulic"
+  },
+  {
+    "id": "SYMP-FLOW-LO-01",
+    "name": "Low Discharge Flow Rate",
+    "description": "Pump delivery rate is substantially below duty point flow specifications.",
+    "aliases": [
+      "pump not moving fluid",
+      "discharge gpm low",
+      "sluggish output flow",
+      "insufficient delivery",
+      "low pump output"
+    ],
+    "alarm_codes": [
+      "ALM-FLOW-LO",
+      "FLOW-WARN-01"
+    ],
+    "category": "hydraulic"
+  },
+  {
+    "id": "SYMP-CURR-HI-01",
+    "name": "High Motor Amperage Draw",
+    "description": "Motor running current draws greater than full-load rated amperes.",
+    "aliases": [
+      "motor tripping overload relay",
+      "drawing high amperage",
+      "breaker popping on start",
+      "high amps on motor",
+      "overcurrent trip"
+    ],
+    "alarm_codes": [
+      "ALM-ELEC-OVR-01",
+      "MCC-TRIP-OC"
+    ],
+    "category": "electrical"
+  },
+  {
+    "id": "SYMP-SMOKE-FIRE-01",
+    "name": "Electrical Arcing & Burning Odor",
+    "description": "Visible sparks, electrical flash, or acrid insulation smoke originating from terminal head or stator casing.",
+    "aliases": [
+      "smoke coming from motor junction box",
+      "burning electrical smell",
+      "blue sparks seen in terminal head",
+      "acrid smoke",
+      "motor smoking",
+      "terminal box sparking"
+    ],
+    "alarm_codes": [
+      "ALM-ARC-DETECT",
+      "ALM-FIRE-SMOKE-01"
+    ],
+    "category": "safety_emergency"
+  },
+  {
+    "id": "SYMP-SEIZURE-01",
+    "name": "Sudden Mechanical Shaft Seizure",
+    "description": "Sudden screech followed by immediate shaft lockup and rotor stall.",
+    "aliases": [
+      "loud metallic screech then sudden lockup",
+      "shaft locked solid",
+      "grinding metal stall",
+      "pump seized",
+      "motor locked rotor"
+    ],
+    "alarm_codes": [
+      "ALM-STALL-LOCK",
+      "SPEED-ZERO-TRIP"
+    ],
+    "category": "safety_emergency"
+  },
+  {
+    "id": "SYMP-VFD-HARMONIC-01",
+    "name": "Inverter Acoustic Whine & Resonant Vibration",
+    "description": "High-frequency electrical whining sound synchronizing with VFD inverter switching.",
+    "aliases": [
+      "high frequency singing",
+      "whining noise changing with rpm",
+      "vfd whine",
+      "inverter screech"
+    ],
+    "alarm_codes": [
+      "ALM-VFD-RESONANCE",
+      "DRV-FLT-HARMONIC"
+    ],
+    "category": "electrical"
+  },
+  {
+    "id": "SYMP-OIL-CONTAM-01",
+    "name": "Lubricating Oil Emulsification",
+    "description": "Lube oil sight glass displays milky, cloudy, or frothy fluid appearance.",
+    "aliases": [
+      "oil sight glass looks milky",
+      "water in bearing reservoir",
+      "foamy brown oil",
+      "cloudy grease",
+      "contaminated bearing lube"
+    ],
+    "alarm_codes": [
+      "ALM-OIL-CLOUDY"
+    ],
+    "category": "mechanical"
+  },
+  {
+    "id": "SYMP-MOTOR-HUM-01",
+    "name": "Excessive Electromagnetic Hum",
+    "description": "Prominent 100Hz/120Hz magnetic hum accompanied by radial vibration harmonics.",
+    "aliases": [
+      "magnetic hum louder than usual",
+      "buzzing stator core",
+      "unbalanced motor noise",
+      "stator humming"
+    ],
+    "alarm_codes": [
+      "ALM-MTR-ACOUSTIC"
+    ],
+    "category": "electrical"
+  },
+  {
+    "id": "SYMP-LOOSE-MOUNT-01",
+    "name": "Baseplate Soft Foot & Bolt Looseness",
+    "description": "Deflection and high 1x vibration caused by unbolted or distorted foundation footing.",
+    "aliases": [
+      "chattering hold-down bolts",
+      "vibration dropping when foot loosened",
+      "uneven base contact",
+      "soft foot rocking"
+    ],
+    "alarm_codes": [
+      "ALM-BASE-VIB"
+    ],
+    "category": "mechanical"
+  },
+  {
+    "id": "SYMP-AIR-INGRESS-01",
+    "name": "Suction Air Ingress",
+    "description": "Air bubble entrainment through suction flange gasket causing erratic flow and micro-surges.",
+    "aliases": [
+      "milky fluid at discharge",
+      "spluttering pump flow",
+      "bubbles in suction sight glass",
+      "suction sucking air"
+    ],
+    "alarm_codes": [
+      "ALM-AIR-ENTRAIN"
+    ],
+    "category": "hydraulic"
+  },
+  {
+    "id": "SYMP-PUMP-OVERHEAT-01",
+    "name": "Pump Casing Thermal Overheating",
+    "description": "Casing temperature exceeds fluid saturation temperature due to closed-discharge recirculation.",
+    "aliases": [
+      "volute too hot to touch",
+      "steaming casing",
+      "fluid boiling in pump",
+      "pump running dry and hot"
+    ],
+    "alarm_codes": [
+      "ALM-PUMP-TEMP-HI"
+    ],
+    "category": "thermal"
+  }
+]

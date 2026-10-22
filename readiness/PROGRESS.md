@@ -40,4 +40,28 @@ Real API verification executed against Google Generative Language API endpoint `
 ---
 
 ## Phase 1: Synthetic Knowledge Pack
+
+### Knowledge Pack Summary
+Generated via `scripts/generate_knowledge.py` and strictly validated against Pydantic models in `backend/app/graph/schema.py`:
+- **7 Manual Excerpts**: Safety LOTO (`DOC-MAN-SAFETY-01`), CP-200 Rev A (`DOC-MAN-CP200-A`, superseded), CP-200 Rev B (`DOC-MAN-CP200-B`), CP-100 Rev A (`DOC-MAN-CP100-A`), IM-50 Rev C (`DOC-MAN-IM50-C`), IM-50-VFD Rev A (`DOC-MAN-IM50-VFD-A`), Mechanical Seal (`DOC-MAN-SEAL-01`).
+- **15 Symptoms**: Vibration, cavitation, mechanical seal leak, bearing temperature, discharge pressure pulsation, low flow, motor overcurrent, electrical arcing/smoke (safety gate), sudden seizure (safety gate), VFD whine, oil emulsification, magnetic hum, soft foot, air ingress, casing overheating.
+- **12 Candidate Causes**: All linked directly to verified manual document ID and section ID.
+- **10 Procedures**: Steps, expected observations, cautions, required expertise, safety precautions, stop-work conditions, escalation criteria.
+- **9 Parts**: Bearings, mechanical seals, check valve pins, suction strainer baskets, coupling spiders, grounding rings.
+- **14 Past Incidents**: 10 verified + supervisor-approved outcomes, 4 pending verification.
+- **5 Assets**: P-101, P-102, P-103, M-104, M-105 with inspection records.
+
+### Deliberate Traps Verified
+1. **Trap 1 (Wrong-Model Procedure Exclusion)**: `PROC-VFD-HARMONIC-TUNING` applies exclusively to `DuraTorq-IM50-VFD`, not `DuraTorq-IM50`.
+2. **Trap 2 (Superseded Manual Revision)**: `DOC-MAN-CP200-A` (allowing 0.080 mm bearing clearance) is superseded by `DOC-MAN-CP200-B` (mandating 0.038 mm).
+3. **Trap 3 (Model-Specific Root Causes for Identical Symptom)**: `SYMP-DISCH-PULS-01` (discharge pressure pulsation) maps to `CAUSE-IMP-VANE-RESONANCE` for `ApexFlow-CP200` but `CAUSE-VALVE-FLUTTER` for `ApexFlow-CP100`.
+
+### Phase 1 ACCEPT Checks
+- [x] JSON files validate against Pydantic schemas (`KnowledgePack`, `ManualDocument`, `Procedure`, `Cause`, etc.)
+- [x] Every procedure and cause links to a valid `source_doc_id` + `section`
+- [x] Pytest suite passes (`test_knowledge_pack_schema_validation`, `test_provenance_and_source_links`, `test_deliberate_traps_present`)
+
+---
+
+## Phase 2: Graph with Provenance
 *In progress...*

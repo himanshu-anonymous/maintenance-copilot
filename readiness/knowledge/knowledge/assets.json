@@ -1,0 +1,137 @@
+[
+  {
+    "id": "P-101",
+    "name": "Primary Boiler Feed Pump A",
+    "category": "centrifugal_pump",
+    "model": "ApexFlow-CP200",
+    "revision": "Rev B",
+    "manual_id": "DOC-MAN-CP200-B",
+    "effective_date": "2024-01-15",
+    "criticality": "high",
+    "motor_id": "M-104",
+    "inspection_history": [
+      {
+        "inspection_id": "INSP-P101-01",
+        "date": "2024-01-10",
+        "inspector": "inspector_bill",
+        "result": "pass",
+        "notes": "Routine commissioning inspection."
+      },
+      {
+        "inspection_id": "INSP-P101-02",
+        "date": "2024-07-15",
+        "inspector": "inspector_bill",
+        "result": "conditional",
+        "notes": "Vibration slightly elevated (3.8 mm/s). Scheduled monitoring."
+      }
+    ]
+  },
+  {
+    "id": "P-102",
+    "name": "Secondary Transfer Pump B",
+    "category": "centrifugal_pump",
+    "model": "ApexFlow-CP200",
+    "revision": "Rev B",
+    "manual_id": "DOC-MAN-CP200-B",
+    "effective_date": "2024-01-15",
+    "criticality": "medium",
+    "motor_id": "M-105",
+    "inspection_history": [
+      {
+        "inspection_id": "INSP-P102-01",
+        "date": "2024-02-12",
+        "inspector": "inspector_bill",
+        "result": "pass",
+        "notes": "Standard quarterly visual inspection."
+      },
+      {
+        "inspection_id": "INSP-P102-02",
+        "date": "2024-08-18",
+        "inspector": "inspector_bill",
+        "result": "pass",
+        "notes": "Laser alignment verified."
+      }
+    ]
+  },
+  {
+    "id": "P-103",
+    "name": "Condensate Return Pump C",
+    "category": "centrifugal_pump",
+    "model": "ApexFlow-CP100",
+    "revision": "Rev A",
+    "manual_id": "DOC-MAN-CP100-A",
+    "effective_date": "2022-06-01",
+    "criticality": "low",
+    "motor_id": null,
+    "inspection_history": [
+      {
+        "inspection_id": "INSP-P103-01",
+        "date": "2023-11-05",
+        "inspector": "inspector_bill",
+        "result": "pass",
+        "notes": "Annual service check."
+      },
+      {
+        "inspection_id": "INSP-P103-02",
+        "date": "2024-05-10",
+        "inspector": "inspector_bill",
+        "result": "defect_noted",
+        "notes": "Check valve spring slack noted; replaced."
+      }
+    ]
+  },
+  {
+    "id": "M-104",
+    "name": "Feed Pump Electric Motor Drive A",
+    "category": "induction_motor",
+    "model": "DuraTorq-IM50",
+    "revision": "Rev C",
+    "manual_id": "DOC-MAN-IM50-C",
+    "effective_date": "2024-03-01",
+    "criticality": "high",
+    "motor_id": null,
+    "inspection_history": [
+      {
+        "inspection_id": "INSP-M104-01",
+        "date": "2024-03-05",
+        "inspector": "inspector_bill",
+        "result": "pass",
+        "notes": "Motor megger test passed (>500 MOhm)."
+      },
+      {
+        "inspection_id": "INSP-M104-02",
+        "date": "2024-09-12",
+        "inspector": "inspector_bill",
+        "result": "pass",
+        "notes": "Thermal inspection normal (62\u00b0C)."
+      }
+    ]
+  },
+  {
+    "id": "M-105",
+    "name": "Transfer Pump Electric Motor Drive B",
+    "category": "induction_motor",
+    "model": "DuraTorq-IM50",
+    "revision": "Rev C",
+    "manual_id": "DOC-MAN-IM50-C",
+    "effective_date": "2024-03-01",
+    "criticality": "medium",
+    "motor_id": null,
+    "inspection_history": [
+      {
+        "inspection_id": "INSP-M105-01",
+        "date": "2024-04-01",
+        "inspector": "inspector_bill",
+        "result": "pass",
+        "notes": "Initial alignment inspection."
+      },
+      {
+        "inspection_id": "INSP-M105-02",
+        "date": "2024-10-01",
+        "inspector": "inspector_bill",
+        "result": "conditional",
+        "notes": "Soft foot noted on right rear foot. Re-shimmed."
+      }
+    ]
+  }
+]

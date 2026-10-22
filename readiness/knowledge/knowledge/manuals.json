@@ -1,0 +1,167 @@
+[
+  {
+    "doc_id": "DOC-MAN-SAFETY-01",
+    "title": "Industrial Plant Emergency Isolation & Stop-Work Standard Operating Procedure",
+    "revision": "Rev 2.1",
+    "effective_date": "2024-01-01",
+    "applicable_models": [
+      "*"
+    ],
+    "superseded_by": null,
+    "sections": [
+      {
+        "section_id": "SEC-SAFE-01",
+        "title": "Emergency Stop-Work & Lockout/Tagout Protocol",
+        "content": "MANDATORY STOP-WORK: If abnormal thermal signatures, burning odor, visible smoke, electrical arcing, or sudden mechanical shaft seizure is detected, the technician MUST immediately initiate emergency stop, de-energize breaker, and install Lockout/Tagout (LOTO) padlocks. Do not attempt diagnostic measurement while energized under active fault conditions. Immediately escalate to the Plant Electrical Supervisor."
+      },
+      {
+        "section_id": "SEC-SAFE-02",
+        "title": "Hazardous Fluid Containment & Personal Protective Equipment",
+        "content": "For high-pressure hydrocarbon and chemical feed pumps, barrier fluid or process liquid leakage exceeding 5 drops per minute requires immediate containment tray placement and PPE Level C (chemical splash face shield and nitrile gloves)."
+      }
+    ]
+  },
+  {
+    "doc_id": "DOC-MAN-CP200-A",
+    "title": "ApexFlow CP-200 Centrifugal Feed Pump Maintenance Manual (Superseded)",
+    "revision": "Rev A",
+    "effective_date": "2021-04-10",
+    "applicable_models": [
+      "ApexFlow-CP200"
+    ],
+    "superseded_by": "DOC-MAN-CP200-B",
+    "sections": [
+      {
+        "section_id": "SEC-CP200-A-01",
+        "title": "Obsolete Bearing Clearance Tolerances",
+        "content": "SUPERSEDED SPECIFICATION: Maximum radial bearing clearance was formerly 0.080 mm. This specification was found to allow excessive shaft whip under cavitation and has been rescinded."
+      }
+    ]
+  },
+  {
+    "doc_id": "DOC-MAN-CP200-B",
+    "title": "ApexFlow CP-200 Centrifugal Heavy-Duty Feed Pump Operations & Maintenance Manual",
+    "revision": "Rev B",
+    "effective_date": "2024-01-15",
+    "applicable_models": [
+      "ApexFlow-CP200"
+    ],
+    "superseded_by": null,
+    "sections": [
+      {
+        "section_id": "SEC-CP200-01",
+        "title": "Pump Alignment & Dynamic Vibration Limits",
+        "content": "ApexFlow CP-200 requires laser coupling alignment within 0.05 mm angular and 0.03 mm radial offset. ISO 10816-3 overall vibration velocity must remain below 4.5 mm/s RMS in zone A/B. Vibration exceeding 7.1 mm/s RMS indicates severe mechanical unbalance or bearing degradation."
+      },
+      {
+        "section_id": "SEC-CP200-02",
+        "title": "Hydraulic Performance, Cavitation & NPSH Requirements",
+        "content": "Net Positive Suction Head required (NPSHr) is 3.2 meters at best efficiency point. Suction pressure dropping below 1.2 bar gauge results in cavitation bubble collapse against the first-stage impeller eye, characterized by popping/gravel rattling noise and hydraulic shock pulses."
+      },
+      {
+        "section_id": "SEC-CP200-03",
+        "title": "Mechanical Seal & API Plan 11 Flush Regulation",
+        "content": "Fitted with cartridge mechanical seal. API Plan 11 flush circulation delivers process fluid from discharge orifice back to seal chamber. Orifice blockage starves seal faces of lubrication, causing dry running, face scorch marks, and subsequent fluid leakage from the gland drain."
+      },
+      {
+        "section_id": "SEC-CP200-04",
+        "title": "Bearing Housing Maintenance & Active Clearances",
+        "content": "Equipped with deep-groove 6312 ball bearings (drive end) and paired angular contact 7312 bearings (non-drive end). Maximum allowable radial play is 0.038 mm (nominal 0.025 mm). Relubricate with synthetic ISO VG 68 polyurea grease every 2,000 operating hours. Overgreasing induces churning and temperatures above 85\u00b0C."
+      },
+      {
+        "section_id": "SEC-CP200-05",
+        "title": "Impeller Vane Pass Pressure Pulsation & Acoustic Resonance",
+        "content": "CP-200 5-vane impellers operating below 65% minimum continuous stable flow (MCSF) generate acoustic pressure pulsation at 5x running speed. If pulsation amplitude exceeds 1.5 bar peak-to-peak at the discharge nozzle, verify minimum flow bypass valve position and examine diffuser ring for erosion."
+      }
+    ]
+  },
+  {
+    "doc_id": "DOC-MAN-CP100-A",
+    "title": "ApexFlow CP-100 Light Industrial Utility Pump Maintenance Guide",
+    "revision": "Rev A",
+    "effective_date": "2022-06-01",
+    "applicable_models": [
+      "ApexFlow-CP100"
+    ],
+    "superseded_by": null,
+    "sections": [
+      {
+        "section_id": "SEC-CP100-01",
+        "title": "General Construction & Belt Drive Overview",
+        "content": "ApexFlow CP-100 is an end-suction single-stage utility pump. Unlike CP-200, CP-100 incorporates an external spring-loaded swing check valve directly bolted to the discharge flange."
+      },
+      {
+        "section_id": "SEC-CP100-02",
+        "title": "Discharge Check Valve Flutter & Line Pulsation",
+        "content": "Discharge pressure pulsations on CP-100 models are predominantly caused by worn hinge pins or broken return springs in the discharge swing check valve, creating high-frequency disc chatter and gauge oscillation. Do not confuse with impeller acoustic resonance."
+      },
+      {
+        "section_id": "SEC-CP100-03",
+        "title": "Packing Gland & Component Seal Adjustments",
+        "content": "Component mechanical seal with external spring. Allow 10-15 drops per minute leakage during running-in; steady stream signifies cracked silicon carbide primary ring."
+      }
+    ]
+  },
+  {
+    "doc_id": "DOC-MAN-IM50-C",
+    "title": "DuraTorq IM-50 3-Phase Squirrel Cage Induction Motor Technical Specification",
+    "revision": "Rev C",
+    "effective_date": "2024-03-01",
+    "applicable_models": [
+      "DuraTorq-IM50"
+    ],
+    "superseded_by": null,
+    "sections": [
+      {
+        "section_id": "SEC-IM50-01",
+        "title": "Electrical Safety, Voltage Unbalance & Winding Temperature",
+        "content": "DuraTorq IM-50 is a 37kW, 400V 50Hz, 4-pole Class F insulation motor. Phase-to-phase resistance must balance within 1.5%. Phase voltage unbalance exceeding 1% causes a 6% increase in winding temperature. RTD temperature trip setpoint is 130\u00b0C."
+      },
+      {
+        "section_id": "SEC-IM50-02",
+        "title": "Insulation Resistance Megohmmeter Testing",
+        "content": "Measure winding insulation resistance with 1000V DC Megger. Minimum acceptable insulation resistance at 40\u00b0C is 100 Megaohms. Values below 5 Megaohms indicate severe moisture ingress or winding insulation breakdown; do not re-energize."
+      },
+      {
+        "section_id": "SEC-IM50-03",
+        "title": "Motor Bearings, End-Shield Tolerances & Air Gap",
+        "content": "Drive-end bearing 6310 C3 clearance. Air gap uniformity between stator and rotor must be checked at 4 cardinal positions; deviation exceeding 10% indicates worn bearing bracket or bent rotor shaft."
+      }
+    ]
+  },
+  {
+    "doc_id": "DOC-MAN-IM50-VFD-A",
+    "title": "DuraTorq IM-50-VFD Inverter-Duty Drive & Carrier Frequency Supplement",
+    "revision": "Rev A",
+    "effective_date": "2024-04-01",
+    "applicable_models": [
+      "DuraTorq-IM50-VFD"
+    ],
+    "superseded_by": null,
+    "sections": [
+      {
+        "section_id": "SEC-VFD-01",
+        "title": "PWM Carrier Frequency Harmonics & Shaft Voltage Discharge",
+        "content": "CRITICAL APPLICABILITY: This section applies solely to DuraTorq-IM50-VFD equipped with external inverter drives. High PWM carrier frequency (>8 kHz) induces common-mode shaft voltages causing electrical discharge machining (EDM) fluting across bearing raceways. Inspect carbon grounding brush and verify carrier setting."
+      }
+    ]
+  },
+  {
+    "doc_id": "DOC-MAN-SEAL-01",
+    "title": "ApexSeal Cartridge Mechanical Seal Technical Manual",
+    "revision": "Rev 1.0",
+    "effective_date": "2023-09-01",
+    "applicable_models": [
+      "ApexFlow-CP200",
+      "ApexFlow-CP100"
+    ],
+    "superseded_by": null,
+    "sections": [
+      {
+        "section_id": "SEC-SEAL-01",
+        "title": "Cartridge Seal Face Materials & Leakage Limits",
+        "content": "Silicon carbide vs carbon stationary face. Any visible steady spray or continuous puddle indicates secondary O-ring degradation or primary face fracturing due to particulate intrusion."
+      }
+    ]
+  }
+]
