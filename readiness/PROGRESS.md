@@ -148,4 +148,29 @@ Executed 20 expert test cases including deliberate traps and safety emergencies:
 ---
 
 ## Phase 5: Dashboard (React + Vite + Tailwind + Creative Tim + React Flow)
+
+### User Interface Architecture
+- **Multi-Role Experience**:
+  - **Technician Copilot**: Designed for field mobile devices with target asset selector, quick symptom pills, live SSE diagnostic stream, telemetry badges (real-time first-token and total time), pulsating STOP-WORK safety banners, ranked candidate cause cards with evidence strength badges and manual citations, field findings recorder, and draft work order generator.
+  - **Supervisor Reliability Dashboard**: Fleet readiness board with 0-100 scores and compliance penalty audit (clearly highlighting asset P-102 operating on superseded Rev A), approvals queue with one-click verification/rejection modal that incrementally writes verified edges into the knowledge graph, recurring failure clusters with MTBF approximations, interactive `@xyflow/react` graph explorer with full edge/node provenance inspector, and searchable maintenance memory.
+- **Universal Safety Notice**:
+  - Displayed prominently in the persistent header on every screen: `"Notice: Demo with synthetic data. Not for real safety decisions."`
+- **Theme & Ergonomics**:
+  - Full dark mode and light mode support with smooth CSS transitions.
+  - Role switcher toggling between Alex Vance (`tech`) and Elena Rostova (`supervisor`).
+- **Production Build & Delivery**:
+  - Multi-stage Docker build utilizing Node 22 Alpine and Nginx Alpine.
+  - Static bundle served on port 3000 with reverse proxying of all `/api/*` endpoints to the FastAPI backend.
+
+### Phase 5 ACCEPT Checks
+- [x] Production build passes TypeScript verification (`tsc && vite build`) in 2.6s
+- [x] Container `readiness-dashboard` serves production app and proxies `/api/*` seamlessly
+- [x] Technician mobile workflow: asset selection -> symptom pills -> streaming diagnosis -> field finding -> draft work order -> resolution submission
+- [x] Supervisor desktop workflow: readiness board -> approvals queue -> approve/reject -> graph updates live
+- [x] Interactive Graph Explorer built with `@xyflow/react` showing provenance inspector on node click
+- [x] Demo notice visible on all screens
+
+---
+
+## Phase 6: Polish, Warmup & Demo Walkthrough
 *In progress...*
