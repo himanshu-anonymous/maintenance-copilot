@@ -11,12 +11,14 @@ import {
 import '@xyflow/react/dist/style.css';
 import { ShieldCheck, BookOpen, UserCheck, Calendar, Info, Layers, RefreshCw } from 'lucide-react';
 import { fetchAssetSubgraph } from '../api';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
+import { Button } from './ui/button';
 
 interface GraphExplorerProps {
   initialAssetId?: string;
 }
 
-export const GraphExplorer: React.FC<GraphExplorerProps> = ({ initialAssetId = 'P-101' }) => {
+export const GraphExplorer = ({ initialAssetId = 'P-101' }: GraphExplorerProps) => {
   const [selectedAssetId, setSelectedAssetId] = useState<string>(initialAssetId);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -27,24 +29,23 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ initialAssetId = '
     setLoading(true);
     try {
       const data = await fetchAssetSubgraph(assetId);
-      
-      // Enhance nodes with colors based on type
+
       const styledNodes = data.nodes.map((n: any) => {
-        let bg = '#1e293b';
-        let border = '#334155';
-        let color = '#f8fafc';
+        let bg = '#18181b';
+        let border = '#3f3f46';
+        let color = '#fafafa';
 
         if (n.type === 'assetNode') {
-          bg = '#1d4ed8'; // Blue
-          border = '#3b82f6';
+          bg = '#09090b';
+          border = '#71717a';
         } else if (n.type === 'componentNode') {
-          bg = '#0f766e'; // Teal
-          border = '#14b8a6';
+          bg = '#14532d';
+          border = '#22c55e';
         } else if (n.type === 'incidentNode') {
-          bg = '#047857'; // Emerald
+          bg = '#065f46';
           border = '#10b981';
         } else if (n.type === 'causeNode') {
-          bg = '#b45309'; // Amber
+          bg = '#78350f';
           border = '#f59e0b';
         }
 
@@ -53,12 +54,13 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ initialAssetId = '
           style: {
             background: bg,
             color: color,
-            border: `2px solid ${border}`,
-            borderRadius: '12px',
-            padding: '10px 14px',
-            fontSize: '12px',
-            fontWeight: 600,
-            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.2)',
+            border: `1px solid ${border}`,
+            borderRadius: '8px',
+            padding: '8px 12px',
+            fontSize: '11px',
+            fontFamily: 'Geist, Inter, sans-serif',
+            fontWeight: 500,
+            boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)',
           },
         };
       });
@@ -67,9 +69,9 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ initialAssetId = '
         ...e,
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          width: 14,
-          height: 14,
-          color: e.style?.stroke || '#94a3b8',
+          width: 12,
+          height: 12,
+          color: e.style?.stroke || '#71717a',
         },
       }));
 
@@ -97,37 +99,41 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ initialAssetId = '
   return (
     <div className="space-y-4">
       {/* Asset Filter Toolbar */}
-      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="flex items-center gap-3">
-          <Layers className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          <span className="text-sm font-semibold text-slate-900 dark:text-white">
-            Neighborhood Subgraph for:
-          </span>
-          <select
-            value={selectedAssetId}
-            onChange={(e) => setSelectedAssetId(e.target.value)}
-            className="text-xs p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono font-semibold"
+      <Card>
+        <CardContent className="p-3 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2.5">
+            <Layers className="h-4 w-4 text-zinc-500" />
+            <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+              Neighborhood Subgraph for:
+            </span>
+            <select
+              value={selectedAssetId}
+              onChange={(e) => setSelectedAssetId(e.target.value)}
+              className="text-xs p-1.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 font-mono font-medium"
+            >
+              <option value="P-101">P-101 (Primary Feed Pump A)</option>
+              <option value="P-102">P-102 (Transfer Pump B - Superseded Rev A)</option>
+              <option value="P-103">P-103 (Condensate Pump C)</option>
+              <option value="M-104">M-104 (Feed Motor A)</option>
+              <option value="M-105">M-105 (Transfer Motor B)</option>
+            </select>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => loadGraph(selectedAssetId)}
+            className="h-8 gap-1.5 text-xs"
           >
-            <option value="P-101">P-101 (Boiler Feed Pump A)</option>
-            <option value="P-102">P-102 (Transfer Pump B - Superseded Rev A)</option>
-            <option value="P-103">P-103 (Condensate Pump C)</option>
-            <option value="M-104">M-104 (Feed Motor A)</option>
-            <option value="M-105">M-105 (Transfer Motor B)</option>
-          </select>
-        </div>
+            <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </Button>
+        </CardContent>
+      </Card>
 
-        <button
-          onClick={() => loadGraph(selectedAssetId)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
-        </button>
-      </div>
-
-      {/* Main Graph Visualization Canvas */}
+      {/* Main Canvas & Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[600px]">
-        <div className="lg:col-span-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 overflow-hidden relative shadow-inner">
+        <div className="lg:col-span-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-950 overflow-hidden relative shadow-xs">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -137,102 +143,100 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ initialAssetId = '
             onEdgeClick={onEdgeClick}
             fitView
           >
-            <Controls className="!bg-slate-800 !border-slate-700 !text-white" />
-            <MiniMap
-              className="!bg-slate-900 !border-slate-800"
-              nodeColor={() => '#3b82f6'}
-            />
-            <Background color="#334155" gap={20} size={1} />
+            <Controls className="!bg-zinc-900 !border-zinc-800 !text-zinc-100" />
+            <MiniMap className="!bg-zinc-950 !border-zinc-800" nodeColor={() => '#52525b'} />
+            <Background color="#27272a" gap={16} size={1} />
           </ReactFlow>
         </div>
 
-        {/* Provenance Details Side Panel */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm overflow-y-auto space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <Info className="w-4 h-4 text-blue-500" />
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-              Provenance Inspector
-            </h4>
-          </div>
-
-          {selectedItem ? (
-            <div className="space-y-3 text-xs">
-              <div>
-                <span className="text-[10px] uppercase font-mono text-slate-400">Selected Identifier</span>
-                <div className="font-mono font-bold text-slate-900 dark:text-white text-sm">
-                  {selectedItem.id}
-                </div>
+        {/* Provenance Side Panel */}
+        <Card className="h-full flex flex-col justify-between overflow-y-auto">
+          <div>
+            <CardHeader className="p-4 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-zinc-500" />
+                <CardTitle className="text-xs uppercase tracking-wider font-mono">
+                  Provenance Inspector
+                </CardTitle>
               </div>
+              <CardDescription className="text-[11px]">
+                Click any graph node or relationship edge to inspect verified origin metadata
+              </CardDescription>
+            </CardHeader>
 
-              {selectedItem.data?.label && (
-                <div>
-                  <span className="text-[10px] uppercase font-mono text-slate-400">Label</span>
-                  <div className="font-semibold text-slate-800 dark:text-slate-200">
-                    {selectedItem.data.label}
+            <CardContent className="p-4 space-y-3 text-xs">
+              {selectedItem ? (
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-[10px] uppercase font-mono text-zinc-400">Node Identifier</span>
+                    <div className="font-mono font-bold text-zinc-900 dark:text-zinc-50">
+                      {selectedItem.id}
+                    </div>
                   </div>
+
+                  {selectedItem.data?.label && (
+                    <div>
+                      <span className="text-[10px] uppercase font-mono text-zinc-400">Label</span>
+                      <div className="font-medium text-zinc-800 dark:text-zinc-200">
+                        {selectedItem.data.label}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedItem.data?.raw && (
+                    <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg space-y-2 border border-zinc-200 dark:border-zinc-800">
+                      <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        <span>Verified Precedent Node</span>
+                      </div>
+
+                      {selectedItem.data.raw.approved_by && (
+                        <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300">
+                          <UserCheck className="h-3.5 w-3.5 text-zinc-500" />
+                          <span>Approved by: <strong>{selectedItem.data.raw.approved_by}</strong></span>
+                        </div>
+                      )}
+
+                      {selectedItem.data.raw.incident_date && (
+                        <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300">
+                          <Calendar className="h-3.5 w-3.5 text-zinc-500" />
+                          <span>Date: {selectedItem.data.raw.incident_date}</span>
+                        </div>
+                      )}
+
+                      {selectedItem.data.raw.source_doc_id && (
+                        <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300 font-mono text-[11px]">
+                          <BookOpen className="h-3.5 w-3.5 text-zinc-500" />
+                          <span>
+                            {selectedItem.data.raw.source_doc_id} • §{selectedItem.data.raw.section}
+                          </span>
+                        </div>
+                      )}
+
+                      {selectedItem.data.raw.resolution_notes && (
+                        <p className="mt-2 text-[11px] text-zinc-500 italic">
+                          "{selectedItem.data.raw.resolution_notes}"
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {selectedItem.type === 'edge' && (
+                    <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg space-y-1.5 border border-zinc-200 dark:border-zinc-800 text-[11px]">
+                      <div>Source: <code className="text-zinc-900 dark:text-zinc-100 font-semibold">{selectedItem.data.source}</code></div>
+                      <div>Target: <code className="text-zinc-900 dark:text-zinc-100 font-semibold">{selectedItem.data.target}</code></div>
+                      <div>Edge Type: <strong>{selectedItem.data.label}</strong></div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-10 text-zinc-400 text-xs">
+                  Select a node or edge to view its verified provenance chain.
                 </div>
               )}
-
-              {/* Provenance Details for Nodes */}
-              {selectedItem.data?.raw && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>Verified Knowledge Node</span>
-                  </div>
-
-                  {selectedItem.data.raw.approved_by && (
-                    <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
-                      <UserCheck className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Approved by: <strong>{selectedItem.data.raw.approved_by}</strong></span>
-                    </div>
-                  )}
-
-                  {selectedItem.data.raw.incident_date && (
-                    <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
-                      <Calendar className="w-3.5 h-3.5 text-purple-500" />
-                      <span>Date: {selectedItem.data.raw.incident_date}</span>
-                    </div>
-                  )}
-
-                  {selectedItem.data.raw.source_doc_id && (
-                    <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-mono text-[11px]">
-                      <BookOpen className="w-3.5 h-3.5 text-amber-500" />
-                      <span>
-                        {selectedItem.data.raw.source_doc_id} • §{selectedItem.data.raw.section}
-                      </span>
-                    </div>
-                  )}
-
-                  {selectedItem.data.raw.resolution_notes && (
-                    <div className="mt-2 text-[11px] text-slate-600 dark:text-slate-400 italic">
-                      "{selectedItem.data.raw.resolution_notes}"
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Provenance for Edges */}
-              {selectedItem.type === 'edge' && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
-                    Source: <code className="text-blue-500">{selectedItem.data.source}</code>
-                  </div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
-                    Target: <code className="text-indigo-500">{selectedItem.data.target}</code>
-                  </div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
-                    Relationship: <strong>{selectedItem.data.label}</strong>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-slate-400 text-xs">
-              Click any node or edge in the graph to inspect its full provenance, approval metadata, and manual references.
-            </div>
-          )}
-        </div>
+            </CardContent>
+          </div>
+        </Card>
       </div>
     </div>
   );

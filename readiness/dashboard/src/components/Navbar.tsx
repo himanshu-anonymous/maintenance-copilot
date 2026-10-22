@@ -1,5 +1,7 @@
-import { ShieldAlert, Sun, Moon, Wrench, BarChart3, UserCheck, Activity } from 'lucide-react';
+import { ShieldAlert, Sun, Moon, Wrench, LayoutDashboard, UserCheck, Activity } from 'lucide-react';
 import { Role } from '../types';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 
 interface NavbarProps {
   currentView: 'technician' | 'supervisor';
@@ -11,7 +13,7 @@ interface NavbarProps {
   pendingApprovalsCount: number;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
+export const Navbar = ({
   currentView,
   onSelectView,
   currentRole,
@@ -19,92 +21,96 @@ export const Navbar: React.FC<NavbarProps> = ({
   darkMode,
   onToggleDarkMode,
   pendingApprovalsCount,
-}) => {
+}: NavbarProps) => {
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm">
-      {/* Universal Synthetic Demo Notice Banner */}
-      <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 text-center text-xs font-mono font-medium text-amber-700 dark:text-amber-400 flex items-center justify-center gap-2">
-        <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 text-amber-500" />
-        <span>Notice: Demo with synthetic data. Not for real safety decisions.</span>
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-zinc-950/60">
+      {/* Notice Banner */}
+      <div className="border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/60 px-4 py-1.5 text-center text-xs font-mono font-medium text-zinc-600 dark:text-zinc-400 flex items-center justify-center gap-2">
+        <ShieldAlert className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+        <span>Demo with synthetic data. Not for real safety decisions.</span>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-            <Activity className="w-5 h-5" />
+      <div className="max-w-7xl mx-auto flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Logo & Brand */}
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900 shadow-xs">
+            <Activity className="h-4 w-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold tracking-tight text-slate-900 dark:text-white text-base">
+              <span className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
                 Readiness Assistant
               </span>
-              <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
                 Gemma 4
-              </span>
+              </Badge>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-              Evidence-Grounded Reliability Copilot
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 hidden sm:block">
+              Industrial Rotating Machinery Reliability Copilot
             </p>
           </div>
         </div>
 
-        {/* View Switcher Tabs */}
-        <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+        {/* View Switcher Pills */}
+        <div className="flex items-center rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
           <button
+            type="button"
             onClick={() => onSelectView('technician')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-all ${
               currentView === 'technician'
-                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white text-zinc-900 shadow-xs dark:bg-zinc-950 dark:text-zinc-50 font-semibold'
+                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'
             }`}
           >
-            <Wrench className="w-3.5 h-3.5" />
+            <Wrench className="h-3.5 w-3.5" />
             <span>Technician Copilot</span>
           </button>
           <button
+            type="button"
             onClick={() => onSelectView('supervisor')}
-            className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`relative flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-all ${
               currentView === 'supervisor'
-                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white text-zinc-900 shadow-xs dark:bg-zinc-950 dark:text-zinc-50 font-semibold'
+                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'
             }`}
           >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Supervisor Dashboard</span>
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            <span>Supervisor Board</span>
             {pendingApprovalsCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                 {pendingApprovalsCount}
               </span>
             )}
           </button>
         </div>
 
-        {/* User Role Switcher & Theme Toggle */}
+        {/* User Role & Dark Mode Toggle */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
-            <UserCheck className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+          <div className="flex items-center gap-1.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-2 py-1 text-xs">
+            <UserCheck className="h-3.5 w-3.5 text-zinc-500" />
             <select
               value={currentRole}
               onChange={(e) => onSwitchRole(e.target.value as Role)}
-              className="bg-transparent font-medium text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer text-xs"
+              className="bg-transparent font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none cursor-pointer text-xs"
             >
-              <option value="technician" className="dark:bg-slate-900">
+              <option value="technician" className="dark:bg-zinc-900">
                 Alex Vance (Tech)
               </option>
-              <option value="supervisor" className="dark:bg-slate-900">
+              <option value="supervisor" className="dark:bg-zinc-900">
                 Elena Rostova (Supervisor)
               </option>
             </select>
           </div>
 
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onToggleDarkMode}
             aria-label="Toggle theme"
-            className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
           >
-            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
+            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
     </header>

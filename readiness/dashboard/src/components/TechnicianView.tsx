@@ -22,6 +22,11 @@ import {
   createWorkOrder,
   submitWorkOrderResolution
 } from '../api';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 
 interface TechnicianViewProps {
   assets: Asset[];
@@ -38,7 +43,7 @@ const COMMON_SYMPTOM_PILLS = [
   { label: 'Sudden seizure (STOP WORK)', text: 'Loud metallic grinding followed by sudden shaft seizure and high locked-rotor hum', alarm: 'ALM-BRG-SEIZE' },
 ];
 
-export const TechnicianView: React.FC<TechnicianViewProps> = ({ assets, onWorkOrderSubmitted }) => {
+export const TechnicianView = ({ assets, onWorkOrderSubmitted }: TechnicianViewProps) => {
   const [selectedAssetId, setSelectedAssetId] = useState<string>('P-101');
   const [symptomText, setSymptomText] = useState<string>('Violent radial vibration on pump drive-end bearing');
   const [alarmCode, setAlarmCode] = useState<string>('ALM-VIB-101');
@@ -115,7 +120,6 @@ export const TechnicianView: React.FC<TechnicianViewProps> = ({ assets, onWorkOr
             setTiming(doneTiming);
             setIsDiagnosing(false);
 
-            // Create troubleshooting session in background
             try {
               const session = await createTroubleshootingSession({
                 asset_id: selectedAssetId,
@@ -190,151 +194,154 @@ export const TechnicianView: React.FC<TechnicianViewProps> = ({ assets, onWorkOr
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      {/* 1. Equipment Selection Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-              Target Equipment
-            </h2>
-          </div>
-          {selectedAsset && (
+      {/* 1. Target Equipment Selection Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span
-                className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                  selectedAsset.badge_color === 'green'
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
-                    : selectedAsset.badge_color === 'amber'
-                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
-                    : 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-400'
-                }`}
-              >
-                Readiness: {selectedAsset.readiness_score}/100
-              </span>
-              <span className="text-xs text-slate-500 font-mono">
-                {selectedAsset.model} • {selectedAsset.critical_rating}-Class
-              </span>
+              <Cpu className="h-4 w-4 text-zinc-500" />
+              <CardTitle className="text-sm">Target Equipment</CardTitle>
+            </div>
+            {selectedAsset && (
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={
+                    selectedAsset.badge_color === 'green'
+                      ? 'success'
+                      : selectedAsset.badge_color === 'amber'
+                      ? 'warning'
+                      : 'destructive'
+                  }
+                >
+                  Readiness: {selectedAsset.readiness_score}/100
+                </Badge>
+                <span className="text-xs text-zinc-500 font-mono">
+                  {selectedAsset.model} • {selectedAsset.critical_rating}-Class
+                </span>
+              </div>
+            )}
+          </div>
+          <CardDescription>
+            Select industrial pump or induction motor drive for diagnostic evaluation
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {assets.map((asset) => {
+              const isSelected = asset.asset_id === selectedAssetId;
+              return (
+                <button
+                  type="button"
+                  key={asset.asset_id}
+                  onClick={() => setSelectedAssetId(asset.asset_id)}
+                  className={`p-3 rounded-lg border text-left transition-all relative cursor-pointer ${
+                    isSelected
+                      ? 'border-zinc-900 bg-zinc-50 dark:border-zinc-100 dark:bg-zinc-900 shadow-xs'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-transparent'
+                  }`}
+                >
+                  <div className="font-mono font-bold text-sm text-zinc-900 dark:text-zinc-50">
+                    {asset.asset_id}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                    {asset.name}
+                  </div>
+                  {asset.is_superseded_manual && (
+                    <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-500" title="Superseded Manual Trap" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedAsset?.is_superseded_manual && (
+            <div className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
+              <div>
+                <strong>Compliance Trap Flagged:</strong> {selectedAsset.superseded_warning}
+              </div>
             </div>
           )}
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Equipment Selector Chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {assets.map((asset) => {
-            const isSelected = asset.asset_id === selectedAssetId;
-            return (
-              <button
-                key={asset.asset_id}
-                onClick={() => setSelectedAssetId(asset.asset_id)}
-                className={`p-3 rounded-xl border text-left transition-all relative ${
-                  isSelected
-                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 ring-2 ring-blue-500/20'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                }`}
-              >
-                <div className="font-mono font-bold text-sm text-slate-900 dark:text-white">
-                  {asset.asset_id}
-                </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  {asset.name}
-                </div>
-                {asset.is_superseded_manual && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500" title="Superseded Manual Trap" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+      {/* 2. Symptom Input Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Observed Symptoms & Fault Indicators</CardTitle>
+          <CardDescription>
+            Select standard industrial scenario pills or input custom field observations
+          </CardDescription>
+        </CardHeader>
 
-        {/* Warning callout if asset is on superseded manual */}
-        {selectedAsset?.is_superseded_manual && (
-          <div className="mt-3 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 text-amber-600 mt-0.5" />
-            <div>
-              <strong>Compliance Notice:</strong> {selectedAsset.superseded_warning}
+        <CardContent className="space-y-4">
+          <div>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {COMMON_SYMPTOM_PILLS.map((pill, idx) => (
+                <button
+                  type="button"
+                  key={idx}
+                  onClick={() => {
+                    setSymptomText(pill.text);
+                    setAlarmCode(pill.alarm || '');
+                  }}
+                  className={`text-xs px-2.5 py-1 rounded-md border transition-all cursor-pointer ${
+                    symptomText === pill.text
+                      ? 'bg-zinc-900 text-zinc-50 border-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 dark:border-zinc-50 font-medium'
+                      : 'bg-zinc-50/60 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
             </div>
-          </div>
-        )}
-      </div>
 
-      {/* 2. Symptom Input & Quick Pills */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
-            Quick Symptom Scenarios (Tap to Load)
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {COMMON_SYMPTOM_PILLS.map((pill, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setSymptomText(pill.text);
-                  setAlarmCode(pill.alarm || '');
-                }}
-                className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${
-                  symptomText === pill.text
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                {pill.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Observed Symptom Description
-          </label>
-          <textarea
-            rows={3}
-            value={symptomText}
-            onChange={(e) => setSymptomText(e.target.value)}
-            placeholder="Describe what you hear, see, feel, or smell..."
-            className="w-full text-sm p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-sans"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
-              Alarm Code (Optional)
-            </label>
-            <input
-              type="text"
-              value={alarmCode}
-              onChange={(e) => setAlarmCode(e.target.value)}
-              placeholder="e.g. ALM-VIB-101"
-              className="text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white w-48 font-mono"
+            <Textarea
+              rows={3}
+              value={symptomText}
+              onChange={(e) => setSymptomText(e.target.value)}
+              placeholder="Describe what you hear, see, feel, or measure on the machine..."
+              className="resize-none font-sans"
             />
           </div>
 
-          <button
-            onClick={handleStartDiagnosis}
-            disabled={isDiagnosing || !symptomText.trim()}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md shadow-blue-500/20 disabled:opacity-50 transition-all self-end"
-          >
-            {isDiagnosing ? (
-              <>
-                <Sparkles className="w-4 h-4 animate-spin" />
-                <span>Diagnosing...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4" />
-                <span>Diagnose Asset</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="w-48">
+              <Input
+                type="text"
+                value={alarmCode}
+                onChange={(e) => setAlarmCode(e.target.value)}
+                placeholder="Alarm Code (optional)"
+                className="font-mono text-xs"
+              />
+            </div>
 
-      {/* Error Banner */}
+            <Button
+              onClick={handleStartDiagnosis}
+              disabled={isDiagnosing || !symptomText.trim()}
+              className="gap-2"
+            >
+              {isDiagnosing ? (
+                <>
+                  <Sparkles className="h-4 w-4 animate-spin" />
+                  <span>Diagnosing...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4" />
+                  <span>Diagnose Asset</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Error Alert */}
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-xs flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+        <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400 text-xs flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>Diagnostic error: {errorMsg}</span>
         </div>
       )}
@@ -342,262 +349,270 @@ export const TechnicianView: React.FC<TechnicianViewProps> = ({ assets, onWorkOr
       {/* 3. Latency & Telemetry Badge */}
       {timing && (
         <div
-          className={`flex items-center justify-between px-4 py-2 rounded-xl text-xs font-mono border ${
+          className={`flex items-center justify-between px-4 py-2.5 rounded-lg border text-xs font-mono ${
             timing.total_ms > 4000
-              ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
-              : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+              ? 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400'
+              : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <Clock className="w-4 h-4" />
-            <span>
-              First Token: <strong>{timing.first_token_ms} ms</strong> (p50: 711ms)
-            </span>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            <span>First Token: <strong>{timing.first_token_ms} ms</strong></span>
             <span>•</span>
-            <span>
-              Total: <strong>{timing.total_ms} ms</strong>
-            </span>
+            <span>Total: <strong>{timing.total_ms} ms</strong></span>
             <span>•</span>
-            <span>
-              Engine Overhead: <strong>{timing.retrieval_ms || 14} ms</strong>
-            </span>
+            <span>Engine Overhead: <strong>{timing.retrieval_ms || 14} ms</strong></span>
           </div>
-          <span className="font-semibold uppercase tracking-wider text-[10px]">
+          <span className="font-semibold uppercase tracking-wider text-[10px] shrink-0">
             {timing.cache_hit ? '[Cache Hit]' : '[Live Gemma 4]'}
           </span>
         </div>
       )}
 
-      {/* 4. Safety-First Alert Banner (Gatekeeper) */}
+      {/* 4. Safety-First Gatekeeper Banner */}
       {safetyAlert && (
-        <div className="p-4 rounded-2xl bg-red-600 text-white shadow-lg shadow-red-500/20 border-2 border-red-400 animate-pulse">
+        <div className="p-4 rounded-xl border border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400 space-y-2">
           <div className="flex items-start gap-3">
-            <ShieldAlert className="w-6 h-6 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="font-bold text-sm tracking-wide uppercase">
+            <ShieldAlert className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-1">
+              <div className="font-bold uppercase tracking-wider text-xs">
                 CRITICAL SAFETY STOP-WORK HAZARD DETECTED
-              </h3>
-              <p className="text-xs font-medium text-red-100 mt-1">
+              </div>
+              <p className="text-xs">
                 Hazard: {safetyAlert.hazard_type} (Matched: "{safetyAlert.matched_text}")
               </p>
-              <div className="mt-2 p-2.5 bg-red-700/80 rounded-xl text-xs font-mono border border-red-400/30">
+              <div className="p-2.5 rounded-md bg-red-500/15 border border-red-500/20 font-mono text-xs">
                 <strong>MANDATORY ACTION:</strong> {safetyAlert.emergency_action}
               </div>
-              <p className="text-[11px] text-red-200 mt-2">
-                Procedure: <strong>{safetyAlert.procedure_id}</strong>. Immediate electrical isolation & Lockout/Tagout (LOTO) mandated before any physical inspection.
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Governing Procedure: <strong>{safetyAlert.procedure_id}</strong>. Lockout/Tagout (LOTO) isolation required before diagnosis proceeds.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* 5. Ranked Candidate Causes */}
+      {/* 5. Ranked Candidate Cause Cards */}
       {causeCards.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               Evidence-Ranked Candidate Causes
             </h3>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">
-              Deterministic Graph Decides • LLM Synthesizes
-            </span>
+            <span className="text-xs text-zinc-500">Deterministic Graph Traversal</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {causeCards.map((cause, idx) => (
-              <div
-                key={cause.cause_id || idx}
-                className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="font-semibold text-sm text-slate-900 dark:text-white">
-                    {cause.name}
+              <Card key={cause.cause_id || idx} className="hover:border-zinc-300 dark:hover:border-zinc-700">
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-sm">{cause.name}</CardTitle>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Badge
+                        variant={
+                          cause.evidence_strength === 'high'
+                            ? 'success'
+                            : cause.evidence_strength === 'moderate'
+                            ? 'outline'
+                            : 'secondary'
+                        }
+                        className="uppercase text-[10px]"
+                      >
+                        {cause.evidence_strength}
+                      </Badge>
+                      <Badge variant="purple" className="text-[10px]">
+                        {cause.label || 'Documented'}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                        cause.evidence_strength === 'high'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                          : cause.evidence_strength === 'moderate'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                      }`}
-                    >
-                      {cause.evidence_strength}
-                    </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">
-                      {cause.label || 'Documented'}
-                    </span>
-                  </div>
-                </div>
+                </CardHeader>
 
-                {cause.explanation && (
-                  <p className="text-xs text-slate-600 dark:text-slate-300">
-                    {cause.explanation}
-                  </p>
-                )}
+                <CardContent className="p-4 pt-0 space-y-2">
+                  {cause.explanation && (
+                    <p className="text-xs text-zinc-600 dark:text-zinc-300">
+                      {cause.explanation}
+                    </p>
+                  )}
 
-                {cause.evidence_reasons && cause.evidence_reasons.length > 0 && (
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                    {cause.evidence_reasons.map((r, i) => (
-                      <div key={i} className="flex items-center gap-1.5">
-                        <span className="w-1 h-1 rounded-full bg-blue-500" />
-                        <span>{r}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                  {cause.evidence_reasons && cause.evidence_reasons.length > 0 && (
+                    <div className="text-[11px] text-zinc-500 space-y-0.5">
+                      {cause.evidence_reasons.map((r, i) => (
+                        <div key={i} className="flex items-center gap-1.5">
+                          <span className="w-1 h-1 rounded-full bg-zinc-400" />
+                          <span>{r}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
 
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                  <span className="font-mono flex items-center gap-1">
-                    <BookOpen className="w-3 h-3 text-slate-400" />
+                <CardFooter className="p-4 pt-0 border-t border-zinc-100 dark:border-zinc-800/80 mt-2 flex items-center justify-between text-xs text-zinc-500 font-mono">
+                  <span className="flex items-center gap-1 text-[11px]">
+                    <BookOpen className="h-3 w-3 text-zinc-400" />
                     {cause.source_doc_id} • §{cause.section}
                   </span>
-                  <span className="text-blue-600 dark:text-blue-400 font-mono text-[10px]">
+                  <span className="text-[10px] text-zinc-400">
                     {cause.cause_id}
                   </span>
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>
       )}
 
-      {/* 6. Streaming Synthesis Explanation */}
+      {/* 6. Grounded Synthesis Stream */}
       {streamedText && (
-        <div className="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-sans">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-            AI Diagnostic Synthesis (Strictly Grounded)
-          </div>
-          <div className="whitespace-pre-line text-xs">{streamedText}</div>
-        </div>
+        <Card className="bg-zinc-50/70 dark:bg-zinc-900/50">
+          <CardHeader className="p-4 pb-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-zinc-500" />
+              <CardTitle className="text-xs uppercase tracking-wider text-zinc-500 font-mono">
+                AI Diagnostic Synthesis (Strictly Grounded)
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <p className="whitespace-pre-line text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+              {streamedText}
+            </p>
+          </CardContent>
+        </Card>
       )}
 
-      {/* 7. Technician Field Finding Recording */}
+      {/* 7. Field Findings Recording Card */}
       {causeCards.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center gap-2">
-            <ClipboardCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              Record Field Finding & Measurements
-            </h3>
-          </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4 text-zinc-500" />
+              <CardTitle className="text-sm">Record Field Finding & Measurements</CardTitle>
+            </div>
+            <CardDescription>
+              Capture calibrated instrument readings and physical inspection observations
+            </CardDescription>
+          </CardHeader>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                  Finding Type
+                </label>
+                <select
+                  value={findingType}
+                  onChange={(e) => setFindingType(e.target.value)}
+                  className="w-full text-xs p-2 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50"
+                >
+                  <option value="measurement">Physical Measurement</option>
+                  <option value="observation">Visual Observation</option>
+                  <option value="unresolved">Unresolved / Needs Teardown</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                  Parameter
+                </label>
+                <Input
+                  type="text"
+                  value={findingParameter}
+                  onChange={(e) => setFindingParameter(e.target.value)}
+                  className="font-mono text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                  Value Measured
+                </label>
+                <Input
+                  type="text"
+                  value={findingValue}
+                  onChange={(e) => setFindingValue(e.target.value)}
+                  className="font-mono text-xs"
+                />
+              </div>
+            </div>
+
             <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                Finding Type
+              <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                Inspection Notes
               </label>
-              <select
-                value={findingType}
-                onChange={(e) => setFindingType(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              <Input
+                type="text"
+                value={findingNotes}
+                onChange={(e) => setFindingNotes(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRecordFinding}
+                disabled={findingSaved}
+                className="gap-1.5"
               >
-                <option value="measurement">Physical Measurement</option>
-                <option value="observation">Visual Observation</option>
-                <option value="unresolved">Unresolved / Needs Teardown</option>
-              </select>
+                {findingSaved ? (
+                  <>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    <span>Finding Recorded</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Record Finding</span>
+                  </>
+                )}
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={handleGenerateDraftWorkOrder}
+                disabled={draftWorkOrder !== null}
+                className="gap-1.5"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                <span>Generate Draft Work Order</span>
+              </Button>
             </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                Parameter
-              </label>
-              <input
-                type="text"
-                value={findingParameter}
-                onChange={(e) => setFindingParameter(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                Value Measured
-              </label>
-              <input
-                type="text"
-                value={findingValue}
-                onChange={(e) => setFindingValue(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-              Inspection Notes
-            </label>
-            <input
-              type="text"
-              value={findingNotes}
-              onChange={(e) => setFindingNotes(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <button
-              onClick={handleRecordFinding}
-              disabled={findingSaved}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-sm disabled:opacity-50 flex items-center gap-2"
-            >
-              {findingSaved ? (
-                <>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Finding Saved to Session</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Record Finding</span>
-                </>
-              )}
-            </button>
-
-            <button
-              onClick={handleGenerateDraftWorkOrder}
-              disabled={draftWorkOrder !== null}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-sm disabled:opacity-50 flex items-center gap-2"
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Generate Draft Work Order</span>
-            </button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* 8. Draft Work Order & Resolution Submission */}
       {draftWorkOrder && (
-        <div className="bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl p-5 border border-indigo-200 dark:border-indigo-800/60 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Wrench className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+        <Card className="border-zinc-300 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-900/40">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Wrench className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
+                <CardTitle className="text-sm">
                   Draft Work Order: {draftWorkOrder.id}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Status: <strong>{draftWorkOrder.status}</strong> • Priority: {draftWorkOrder.priority}
-                </p>
+                </CardTitle>
               </div>
+              <Badge variant="outline" className="text-[10px]">
+                Pending Supervisor Review
+              </Badge>
             </div>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">
-              Needs Supervisor Approval
-            </span>
-          </div>
+            <CardDescription>
+              Assignee: Field Technician • Asset: {draftWorkOrder.asset_id} • Priority: {draftWorkOrder.priority}
+            </CardDescription>
+          </CardHeader>
 
-          <div className="space-y-3 pt-2">
+          <CardContent className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                 Confirmed Root Cause
               </label>
               <select
                 value={confirmedCauseId}
                 onChange={(e) => setConfirmedCauseId(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
+                className="w-full text-xs p-2 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 font-mono text-zinc-900 dark:text-zinc-50"
               >
                 {causeCards.map((c) => (
                   <option key={c.cause_id} value={c.cause_id}>
@@ -608,54 +623,56 @@ export const TechnicianView: React.FC<TechnicianViewProps> = ({ assets, onWorkOr
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                 Corrective Action Taken
               </label>
-              <textarea
+              <Textarea
                 rows={2}
                 value={actionTaken}
                 onChange={(e) => setActionTaken(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-sans"
+                className="text-xs resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                 Parts Installed / Replaced
               </label>
-              <input
+              <Input
                 type="text"
                 value={partsUsed}
                 onChange={(e) => setPartsUsed(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
+                className="text-xs font-mono"
               />
             </div>
 
-            <div className="pt-2 flex items-center justify-between">
-              <span className="text-[11px] text-slate-500">
-                Notice: Submitting will move work order to <em>pending_approval</em> for supervisor review.
+            <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
+              <span className="text-[11px] text-zinc-500">
+                Notice: Submitting will move work order to <em>pending_approval</em>. AI cannot mark ready.
               </span>
 
-              <button
+              <Button
+                variant={resolutionSubmitted ? 'outline' : 'default'}
+                size="sm"
                 onClick={handleSubmitResolution}
                 disabled={resolutionSubmitted}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2"
+                className="gap-1.5"
               >
                 {resolutionSubmitted ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Submitted for Supervisor Approval</span>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    <span>Submitted for Approval</span>
                   </>
                 ) : (
                   <>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="h-3.5 w-3.5" />
                     <span>Submit Resolution</span>
                   </>
                 )}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

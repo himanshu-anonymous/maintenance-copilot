@@ -186,3 +186,30 @@ Executed 20 expert test cases including deliberate traps and safety emergencies:
 - [x] README.md contains architectural diagrams, stack specs, and measured latency numbers
 - [x] All 6 phases completed end-to-end with green checks across all acceptance criteria
 - [x] Git repository ready for push to remote: `https://github.com/himanshu-anonymous/maintenance-copilot.git`
+
+---
+
+## Phase 7: UI Overhaul to official `shadcn/ui` Design System
+
+### Objectives & Scope
+- Transformed entire user interface to official `shadcn/ui` design system (cloned from `https://github.com/shadcn-ui/ui`).
+- Adopted shadcn/ui typography (Geist Sans, Geist Mono, Inter), official oklch CSS color tokens, zinc palettes, elevation rules, card surfaces, border structures, and utility helpers.
+- Built reusable modular primitives in `readiness/dashboard/src/components/ui/` with `class-variance-authority` (cva), `clsx`, and `tailwind-merge`:
+  - `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`
+  - `Button`, `buttonVariants` (default, destructive, outline, secondary, ghost, link, success)
+  - `Badge`, `badgeVariants` (default, secondary, destructive, outline, success, warning, purple)
+  - `Input` & `Textarea`
+  - `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`
+  - `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
+  - `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`
+- Fully updated views:
+  - `Navbar`: Minimalist border-b header, Geist font, badge tags, ghost buttons, role switcher.
+  - `TechnicianView`: Clean mobile-first layout, cards with subtle borders, evidence badges, streaming output cards.
+  - `SupervisorDashboard`: Clean tabular readiness and approvals queues, modal dialogs, status badges.
+  - `GraphExplorer`: Card containers, zinc styling, and provenance inspector.
+
+### Verification & Delivery
+- [x] TypeScript & Vite production build succeeds (`tsc && vite build`) in 2.4s with 0 errors
+- [x] Multi-stage Docker build succeeds (`readiness-dashboard`) and container runs healthy on port 3000
+- [x] Proxying and API communication to backend verified (`GET /api/health` HTTP 200)
+- [x] Demo notice retained prominently: `"Notice: Demo with synthetic data. Not for real safety decisions."`

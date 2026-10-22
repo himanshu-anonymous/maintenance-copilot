@@ -4,7 +4,7 @@ import {
   XCircle,
   Search,
   ShieldCheck,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { Asset, WorkOrder, RecurringCluster } from '../types';
 import {
@@ -15,13 +15,21 @@ import {
   fetchReadinessBoard,
 } from '../api';
 import { GraphExplorer } from './GraphExplorer';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 
 interface SupervisorDashboardProps {
   onRefreshData?: () => void;
 }
 
-export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ onRefreshData }) => {
-  const [activeTab, setActiveTab] = useState<'readiness' | 'approvals' | 'recurring' | 'graph' | 'memory'>('readiness');
+export const SupervisorDashboard = ({ onRefreshData }: SupervisorDashboardProps) => {
+  const [activeTab, setActiveTab] = useState<string>('readiness');
   const [assets, setAssets] = useState<Asset[]>([]);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [recurringClusters, setRecurringClusters] = useState<RecurringCluster[]>([]);
@@ -83,7 +91,6 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ onRefr
     }
   };
 
-  // Filter maintenance memory
   const memoryItems = [
     { id: 'INC-0001', asset: 'P-101', cause: 'Bearing Ball & Race Fatigue Wear', proc: 'PROC-BRG-INSPECT', notes: 'Inner ring spall replaced with 6312-C3.', approved_by: 'supervisor', date: '2024-03-12' },
     { id: 'INC-0002', asset: 'P-101', cause: 'Suction Starvation & Cavitation', proc: 'PROC-SUCT-CLEAR', notes: 'Cleared 40% clogging of strainer mesh.', approved_by: 'supervisor', date: '2024-05-18' },
@@ -102,111 +109,61 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ onRefr
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Sub-Navigation Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('readiness')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeTab === 'readiness'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3 flex-wrap gap-2">
+          <TabsList>
+            <TabsTrigger value="readiness">Readiness Board</TabsTrigger>
+            <TabsTrigger value="approvals" badge={pendingWorkOrders.length}>
+              Approvals Queue
+            </TabsTrigger>
+            <TabsTrigger value="recurring">Recurring Faults & MTBF</TabsTrigger>
+            <TabsTrigger value="graph">Graph Explorer (@xyflow)</TabsTrigger>
+            <TabsTrigger value="memory">Maintenance Memory</TabsTrigger>
+          </TabsList>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadData}
+            className="gap-1.5 h-8 text-xs"
           >
-            Readiness Board
-          </button>
-          <button
-            onClick={() => setActiveTab('approvals')}
-            className={`relative px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeTab === 'approvals'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            Approvals Queue
-            {pendingWorkOrders.length > 0 && (
-              <span className="ml-1.5 px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[10px]">
-                {pendingWorkOrders.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('recurring')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeTab === 'recurring'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            Recurring Faults & MTBF
-          </button>
-          <button
-            onClick={() => setActiveTab('graph')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeTab === 'graph'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            Graph Explorer (@xyflow)
-          </button>
-          <button
-            onClick={() => setActiveTab('memory')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeTab === 'memory'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            Maintenance Memory
-          </button>
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Sync</span>
+          </Button>
         </div>
 
-        <button
-          onClick={loadData}
-          className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Sync</span>
-        </button>
-      </div>
-
-      {/* TAB 1: READINESS BOARD */}
-      {activeTab === 'readiness' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {/* TAB 1: READINESS BOARD */}
+        <TabsContent value="readiness" className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {assets.map((asset) => (
-              <div
-                key={asset.asset_id}
-                className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono font-bold text-base text-slate-900 dark:text-white">
-                      {asset.asset_id}
-                    </span>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+              <Card key={asset.asset_id} className="flex flex-col justify-between">
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="font-mono text-base">{asset.asset_id}</CardTitle>
+                    <Badge
+                      variant={
                         asset.badge_color === 'green'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                          ? 'success'
                           : asset.badge_color === 'amber'
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                          : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
-                      }`}
+                          ? 'warning'
+                          : 'destructive'
+                      }
+                      className="text-xs"
                     >
                       {asset.readiness_score}/100
-                    </span>
+                    </Badge>
                   </div>
-
-                  <div className="text-xs font-medium text-slate-800 dark:text-slate-200 mb-1 truncate">
+                  <div className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate mt-1">
                     {asset.name}
                   </div>
-                  <div className="text-[11px] text-slate-500 mb-3">
+                  <CardDescription className="text-[11px]">
                     {asset.model} • {asset.location}
-                  </div>
+                  </CardDescription>
+                </CardHeader>
 
-                  {/* Progress gauge */}
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-3">
+                <CardContent className="p-4 pt-0 space-y-2">
+                  {/* Progress bar */}
+                  <div className="h-1.5 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
                         asset.badge_color === 'green'
@@ -219,392 +176,386 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({ onRefr
                     />
                   </div>
 
-                  <div className="text-[11px] text-slate-500 space-y-1">
-                    <div>Days since inspection: <strong>{asset.days_since_inspection}d</strong></div>
-                    <div>Open work orders: <strong>{asset.open_work_orders_count}</strong></div>
+                  <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+                    <span>Inspection: {asset.days_since_inspection}d ago</span>
+                    <span>WOs: {asset.open_work_orders_count}</span>
                   </div>
-                </div>
 
-                {asset.is_superseded_manual && (
-                  <div className="mt-3 p-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-[10px] text-amber-800 dark:text-amber-300">
-                    <strong>TRAP 2 FLAGGED:</strong> Running superseded Rev A (0.080mm tolerance superseded by Rev B 0.038mm).
-                  </div>
-                )}
-              </div>
+                  {asset.is_superseded_manual && (
+                    <div className="p-2 rounded-md bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-700 dark:text-amber-400">
+                      <strong>TRAP 2 FLAGGED:</strong> Running superseded Rev A (0.080mm tolerance vs Rev B 0.038mm).
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             ))}
           </div>
 
-          {/* Detailed Fleet Health Table */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Equipment Readiness Breakdown & Penalty Audit
-              </h3>
-              <span className="text-xs text-slate-500">5 Monitored Assets</span>
-            </div>
+          {/* Detailed Table */}
+          <Card>
+            <CardHeader className="p-4 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm">
+                    Fleet Readiness & Compliance Penalty Audit
+                  </CardTitle>
+                  <CardDescription>
+                    Real-time 0-100 score components factoring open work order severity, inspection aging, and manual freshness
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs">
+                  5 Assets Monitored
+                </Badge>
+              </div>
+            </CardHeader>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
-                  <tr>
-                    <th className="px-5 py-3">Asset</th>
-                    <th className="px-5 py-3">Category</th>
-                    <th className="px-5 py-3">Manual Rev</th>
-                    <th className="px-5 py-3">Readiness</th>
-                    <th className="px-5 py-3">Status</th>
-                    <th className="px-5 py-3">Active Penalties & Compliance Flags</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Asset ID</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Manual Revision</TableHead>
+                    <TableHead>Readiness Score</TableHead>
+                    <TableHead>Operational Status</TableHead>
+                    <TableHead>Active Penalties & Compliance Flags</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {assets.map((a) => (
-                    <tr key={a.asset_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                      <td className="px-5 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                    <TableRow key={a.asset_id}>
+                      <TableCell className="font-mono font-bold text-zinc-900 dark:text-zinc-50">
                         {a.asset_id}
-                      </td>
-                      <td className="px-5 py-3">{a.category}</td>
-                      <td className="px-5 py-3 font-mono">
+                      </TableCell>
+                      <TableCell className="capitalize">{a.category.replace('_', ' ')}</TableCell>
+                      <TableCell className="font-mono">
                         {a.is_superseded_manual ? (
-                          <span className="text-amber-600 dark:text-amber-400 font-bold">
+                          <Badge variant="warning" className="text-[10px]">
                             Rev A (Superseded)
-                          </span>
+                          </Badge>
                         ) : (
-                          'Rev B/C (Current)'
+                          <Badge variant="secondary" className="text-[10px]">
+                            {a.model.includes('IM50-VFD') ? 'Rev A' : a.model.includes('CP200') ? 'Rev B' : 'Rev C'}
+                          </Badge>
                         )}
-                      </td>
-                      <td className="px-5 py-3">
-                        <span className="font-bold text-sm">{a.readiness_score}</span>/100
-                      </td>
-                      <td className="px-5 py-3">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-bold text-sm">{a.readiness_score}</span>
+                        <span className="text-zinc-400 text-xs">/100</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
                             a.badge_color === 'green'
-                              ? 'bg-emerald-50 text-emerald-700'
+                              ? 'success'
                               : a.badge_color === 'amber'
-                              ? 'bg-amber-50 text-amber-700'
-                              : 'bg-red-50 text-red-700'
-                          }`}
+                              ? 'warning'
+                              : 'destructive'
+                          }
+                          className="text-[10px] capitalize"
                         >
                           {a.status_label}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 space-y-0.5 text-[11px]">
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
                         {a.penalties.length > 0 ? (
-                          a.penalties.map((p, i) => (
-                            <div key={i} className="text-amber-600 dark:text-amber-400">
-                              • {p}
-                            </div>
-                          ))
+                          <div className="space-y-0.5">
+                            {a.penalties.map((p, i) => (
+                              <div key={i} className="text-amber-600 dark:text-amber-400">
+                                • {p}
+                              </div>
+                            ))}
+                          </div>
                         ) : (
-                          <span className="text-emerald-600 dark:text-emerald-400">
+                          <span className="text-emerald-600 dark:text-emerald-400 text-xs">
                             No active penalties. Equipment optimal.
                           </span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* TAB 2: APPROVALS QUEUE */}
-      {activeTab === 'approvals' && (
-        <div className="space-y-4">
+        {/* TAB 2: APPROVALS QUEUE */}
+        <TabsContent value="approvals" className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                 Supervisor Verification & Operational Clearance Gate
               </h3>
-              <p className="text-xs text-slate-500">
-                AI / Technician proposals cannot close incidents. Only verified supervisor approval establishes graph precedent.
+              <p className="text-xs text-zinc-500">
+                The AI and technician cannot mark equipment ready. Only verified supervisor approval establishes graph precedent.
               </p>
             </div>
           </div>
 
           {pendingWorkOrders.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-12 text-center border border-slate-200 dark:border-slate-800">
-              <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Approvals Queue Clean
-              </h4>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                No technician resolutions currently pending review. Switch to Technician Copilot to diagnose an asset and submit a resolution.
-              </p>
-            </div>
+            <Card className="p-12 text-center">
+              <CheckCircle className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
+              <CardTitle className="text-sm mb-1">Approvals Queue Empty</CardTitle>
+              <CardDescription className="max-w-md mx-auto text-xs">
+                No technician resolutions currently awaiting supervisor verification. Switch to Technician Copilot to troubleshoot an asset and submit a resolution.
+              </CardDescription>
+            </Card>
           ) : (
             <div className="space-y-3">
               {pendingWorkOrders.map((wo) => (
-                <div
-                  key={wo.id}
-                  className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-                >
+                <Card key={wo.id} className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1.5 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
-                        {wo.id}
-                      </span>
-                      <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-semibold uppercase">
+                      <span className="font-mono font-bold text-sm">{wo.id}</span>
+                      <Badge variant="warning" className="text-[10px] uppercase">
                         Pending Review
-                      </span>
-                      <span className="text-xs text-slate-500 font-mono font-bold">
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px] font-mono">
                         Asset: {wo.asset_id}
-                      </span>
+                      </Badge>
                     </div>
 
-                    <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                       {wo.title}
                     </div>
 
-                    <div className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div className="text-xs text-zinc-600 dark:text-zinc-300 p-2.5 rounded-md bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 space-y-1">
                       <div>
-                        <strong>Technician Action:</strong> {wo.resolution_action_taken}
+                        <strong>Technician Action Taken:</strong> {wo.resolution_action_taken}
                       </div>
-                      <div className="mt-1 flex items-center gap-4 text-[11px] text-slate-500">
-                        <span>Confirmed Cause: <strong className="text-blue-500 font-mono">{wo.resolution_confirmed_cause}</strong></span>
-                        <span>Parts Replaced: <strong className="font-mono">{wo.resolution_parts_used || 'None'}</strong></span>
+                      <div className="flex items-center gap-4 text-[11px] text-zinc-500">
+                        <span>Confirmed Cause: <code className="text-zinc-900 dark:text-zinc-100 font-bold">{wo.resolution_confirmed_cause}</code></span>
+                        <span>Parts Replaced: <code className="font-mono">{wo.resolution_parts_used || 'None'}</code></span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0 self-end md:self-center">
-                    <button
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setRejectionModalWo(wo)}
-                      className="px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-300 text-xs font-semibold rounded-xl border border-red-200 dark:border-red-800 transition-colors flex items-center gap-1.5"
+                      className="text-red-600 dark:text-red-400 hover:text-red-700 gap-1.5"
                     >
-                      <XCircle className="w-4 h-4" />
+                      <XCircle className="h-3.5 w-3.5" />
                       <span>Reject</span>
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                      variant="success"
+                      size="sm"
                       onClick={() => setApprovalModalWo(wo)}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5"
+                      className="gap-1.5"
                     >
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle className="h-3.5 w-3.5" />
                       <span>Verify & Approve</span>
-                    </button>
+                    </Button>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
-        </div>
-      )}
+        </TabsContent>
 
-      {/* TAB 3: RECURRING FAULTS & MTBF */}
-      {activeTab === 'recurring' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+        {/* TAB 3: RECURRING FAULTS & MTBF */}
+        <TabsContent value="recurring" className="space-y-4">
+          <Card>
+            <CardHeader className="p-4 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <CardTitle className="text-sm">
                 Equipment Failure Clusters & MTBF Approximations
-              </h3>
-              <p className="text-xs text-slate-500">
-                Calculated dynamically from verified maintenance incident history over operating lifetime.
-              </p>
-            </div>
-          </div>
+              </CardTitle>
+              <CardDescription>
+                Calculated dynamically from verified maintenance incident history across asset components
+              </CardDescription>
+            </CardHeader>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="px-5 py-3">Asset</th>
-                  <th className="px-5 py-3">Component Involved</th>
-                  <th className="px-5 py-3">Confirmed Root Cause</th>
-                  <th className="px-5 py-3">Frequency</th>
-                  <th className="px-5 py-3">Downtime (hrs)</th>
-                  <th className="px-5 py-3">Approx MTBF</th>
-                  <th className="px-5 py-3">Risk Assessment</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                {recurringClusters.map((cluster, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-5 py-3 font-mono font-bold text-slate-900 dark:text-white">
-                      {cluster.asset_id}
-                    </td>
-                    <td className="px-5 py-3">{cluster.component_name}</td>
-                    <td className="px-5 py-3 font-semibold text-slate-800 dark:text-slate-200">
-                      {cluster.cause_name}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className="font-bold">{cluster.occurrence_count}</span> incidents
-                    </td>
-                    <td className="px-5 py-3 font-mono">{cluster.total_downtime_hours} hrs</td>
-                    <td className="px-5 py-3 font-mono font-semibold text-blue-600 dark:text-blue-400">
-                      {cluster.approx_mtbf_hours.toLocaleString()} hrs
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                          cluster.risk_level === 'High'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
-                            : cluster.risk_level === 'Moderate'
-                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                            : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                        }`}
-                      >
-                        {cluster.risk_level}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Asset</TableHead>
+                    <TableHead>Component</TableHead>
+                    <TableHead>Confirmed Root Cause</TableHead>
+                    <TableHead>Frequency</TableHead>
+                    <TableHead>Downtime (hrs)</TableHead>
+                    <TableHead>Approx MTBF</TableHead>
+                    <TableHead>Risk Level</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recurringClusters.map((cluster, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="font-mono font-bold text-zinc-900 dark:text-zinc-50">
+                        {cluster.asset_id}
+                      </TableCell>
+                      <TableCell>{cluster.component_name}</TableCell>
+                      <TableCell className="font-medium text-zinc-800 dark:text-zinc-200">
+                        {cluster.cause_name}
+                      </TableCell>
+                      <TableCell className="font-mono">{cluster.occurrence_count} incidents</TableCell>
+                      <TableCell className="font-mono">{cluster.total_downtime_hours} hrs</TableCell>
+                      <TableCell className="font-mono font-semibold">
+                        {cluster.approx_mtbf_hours.toLocaleString()} hrs
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            cluster.risk_level === 'High'
+                              ? 'destructive'
+                              : cluster.risk_level === 'Moderate'
+                              ? 'warning'
+                              : 'success'
+                          }
+                          className="text-[10px] uppercase"
+                        >
+                          {cluster.risk_level}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* TAB 4: GRAPH EXPLORER */}
-      {activeTab === 'graph' && <GraphExplorer />}
+        {/* TAB 4: GRAPH EXPLORER */}
+        <TabsContent value="graph">
+          <GraphExplorer />
+        </TabsContent>
 
-      {/* TAB 5: MAINTENANCE MEMORY SEARCH */}
-      {activeTab === 'memory' && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <Search className="w-4 h-4 text-slate-400" />
-            <input
+        {/* TAB 5: MAINTENANCE MEMORY SEARCH */}
+        <TabsContent value="memory" className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search historical verified incidents, root causes, and corrective actions..."
-              className="w-full text-xs bg-transparent focus:outline-none text-slate-900 dark:text-white"
+              placeholder="Search past verified incidents, root causes, procedures, and actions..."
+              className="pl-9 text-xs"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {memoryItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 text-xs"
-              >
+              <Card key={item.id} className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                  <span className="font-mono font-bold text-xs text-zinc-900 dark:text-zinc-50">
                     {item.id} • {item.asset}
                   </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 font-semibold">
+                  <Badge variant="success" className="text-[10px]">
                     Verified Precedent
-                  </span>
+                  </Badge>
                 </div>
 
-                <div className="font-semibold text-slate-800 dark:text-slate-200">
+                <div className="font-medium text-xs text-zinc-800 dark:text-zinc-200">
                   {item.cause}
                 </div>
 
-                <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+                <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
                   "{item.notes}"
                 </p>
 
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
                   <span>Procedure: {item.proc}</span>
-                  <span>Approved by: {item.approved_by}</span>
+                  <span>Verified by: {item.approved_by}</span>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
 
-      {/* MODAL: APPROVE WORK ORDER */}
-      {approvalModalWo && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full space-y-4">
+      {/* APPROVAL DIALOG */}
+      <Dialog open={approvalModalWo !== null} onOpenChange={(open) => !open && setApprovalModalWo(null)}>
+        <DialogContent onClose={() => setApprovalModalWo(null)}>
+          <DialogHeader>
             <div className="flex items-center gap-2 text-emerald-600">
-              <ShieldCheck className="w-5 h-5" />
-              <h3 className="text-sm font-bold">Approve Resolution & Verify Outcome</h3>
+              <ShieldCheck className="h-5 w-5" />
+              <DialogTitle>Approve Resolution & Commit Precedent</DialogTitle>
             </div>
+            <DialogDescription>
+              Verification creates a permanent <strong>Verified Outcome edge</strong> in the in-memory graph.
+            </DialogDescription>
+          </DialogHeader>
 
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Approving will establish a <strong>Verified Precedent edge</strong> in the knowledge graph. This outcome will guide future AI diagnoses.
-            </p>
-
+          <div className="space-y-3 py-2 text-xs">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                 Downtime Duration (Hours)
               </label>
-              <input
+              <Input
                 type="number"
                 step="0.5"
                 value={downtimeHours}
                 onChange={(e) => setDowntimeHours(parseFloat(e.target.value))}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono"
+                className="font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                 Supervisor Approval Notes
               </label>
-              <textarea
+              <Textarea
                 rows={3}
                 value={approvalNotes}
                 onChange={(e) => setApprovalNotes(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-sans"
+                className="resize-none"
               />
             </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setApprovalModalWo(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleApprove}
-                className="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20"
-              >
-                Confirm Approval & Write to Graph
-              </button>
-            </div>
           </div>
-        </div>
-      )}
 
-      {/* MODAL: REJECT WORK ORDER */}
-      {rejectionModalWo && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full space-y-4">
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setApprovalModalWo(null)}>
+              Cancel
+            </Button>
+            <Button variant="success" size="sm" onClick={handleApprove}>
+              Confirm Approval & Write to Graph
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* REJECTION DIALOG */}
+      <Dialog open={rejectionModalWo !== null} onOpenChange={(open) => !open && setRejectionModalWo(null)}>
+        <DialogContent onClose={() => setRejectionModalWo(null)}>
+          <DialogHeader>
             <div className="flex items-center gap-2 text-red-600">
-              <XCircle className="w-5 h-5" />
-              <h3 className="text-sm font-bold">Reject Work Order</h3>
+              <XCircle className="h-5 w-5" />
+              <DialogTitle>Reject Work Order Resolution</DialogTitle>
             </div>
+            <DialogDescription>
+              Rejection returns the task to the technician for revision. <strong>No edges</strong> will be created in the knowledge graph.
+            </DialogDescription>
+          </DialogHeader>
 
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Rejecting will return this resolution to the technician with feedback. <strong>Zero edges</strong> will be created in the knowledge graph.
-            </p>
-
+          <div className="space-y-3 py-2 text-xs">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Rejection Reason & Required Feedback
+              <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                Rejection Reason & Required Remediation
               </label>
-              <textarea
+              <Textarea
                 rows={3}
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-sans"
+                className="resize-none"
               />
             </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setRejectionModalWo(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleReject}
-                className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-500/20"
-              >
-                Confirm Rejection
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setRejectionModalWo(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleReject}>
+              Confirm Rejection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
