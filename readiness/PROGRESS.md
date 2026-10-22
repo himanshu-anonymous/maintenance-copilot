@@ -64,4 +64,22 @@ Generated via `scripts/generate_knowledge.py` and strictly validated against Pyd
 ---
 
 ## Phase 2: Graph with Provenance
+
+### Architecture & Provenance Verification
+- **Graph Store**: Implemented `GraphStore` abstract interface with `JsonGraphStore` (in-memory, serving all hot-path requests) and `Neo4jGraphStore` (optional mirror writer).
+- **Graph Nodes (81 nodes)**: Equipment (5), Component (9), Symptom (15), Cause (12), Procedure (10), Part (9), Incident (14), Document (7).
+- **Graph Edges (108 edges)**: HAS_COMPONENT, HAS_HISTORY, POSSIBLY_INDICATES, INVESTIGATED_BY, USES_PART, SUPERSEDES, DOCUMENTED_IN.
+- **Edge Provenance**: Every edge carries `source_doc_id`, `section`, `applicable_models`, `revision`, `effective_date`, `origin` (documented | technician_reported), and `verification_status` (unverified | verified).
+- **Benchmark Latency**: `graph.json` loads and indexes into memory in **0.77 ms** (target: < 1000 ms).
+
+### Phase 2 ACCEPT Checks
+- [x] Pytest covers schema validators (`validate_graph`), structure build, and edge provenance
+- [x] Zero orphan procedures and zero orphan causes verified
+- [x] Model applicability filtering verified (Traps 1 & 3 verified on graph traversal)
+- [x] Atomic hot-swapping and incremental verified outcome addition tested
+- [x] `graph.json` loads in < 1 s (Actual: 0.77 ms)
+
+---
+
+## Phase 3: Diagnosis Engine
 *In progress...*
