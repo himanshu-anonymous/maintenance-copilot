@@ -1,0 +1,43 @@
+# Readiness Knowledge Graph Configuration
+category: centrifugal_pump_and_motor
+version: 1.0.0
+description: Synthetic knowledge pack for centrifugal pumps and 3-phase induction motors
+assets:
+  - id: P-101
+    name: Primary Feed Pump
+    category: centrifugal_pump
+    model: ApexFlow-CP200
+    motor_id: M-104
+    revision: Rev B
+    effective_date: "2024-01-15"
+    criticality: high
+  - id: P-102
+    name: Secondary Transfer Pump
+    category: centrifugal_pump
+    model: ApexFlow-CP200
+    motor_id: M-105
+    revision: Rev B
+    effective_date: "2024-01-15"
+    criticality: medium
+  - id: P-103
+    name: Condensate Return Pump
+    category: centrifugal_pump
+    model: ApexFlow-CP100
+    motor_id: M-106
+    revision: Rev A
+    effective_date: "2022-06-01"
+    criticality: low
+  - id: M-104
+    name: Feed Pump Drive Motor
+    category: induction_motor
+    model: DuraTorq-IM50
+    revision: Rev C
+    effective_date: "2024-03-01"
+    criticality: high
+  - id: M-105
+    name: Transfer Pump Drive Motor
+    category: induction_motor
+    model: DuraTorq-IM50
+    revision: Rev C
+    effective_date: "2024-03-01"
+    criticality: medium
